@@ -1,6 +1,7 @@
 require('dotenv').config();
 require('@babel/polyfill');
 const fetch = require('node-fetch');
+const moment = require('moment');
 
 const venues = require('../../constants/venues');
 // Create a list of venues at the top of the page
@@ -26,7 +27,7 @@ for(let i=0;i<1000;i++) {
 
 // Generate the event containers by date
 upcomingDays.forEach(date => {
-    const dayGrid = `<div class="event-container" id="event-container-date-${date.toDateString().split(' ').join("-")}"><h2>${new Date(date).toLocaleString("en-GB")}</h2></div>`;
+    const dayGrid = `<div class="event-container" id="event-container-date-${date.toDateString().split(' ').join("-")}"><h2>${moment(date).format('dddd Do MMMM')}</h2></div>`;
     eventGridContainer.innerHTML = eventGridContainer.innerHTML + dayGrid;
 });
 
