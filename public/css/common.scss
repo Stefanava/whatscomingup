@@ -1,0 +1,58 @@
+#heroku-panel {
+    display: none;
+}
+
+#aws-panel {
+    display: none;
+}
+
+/* Default Table Style */
+table {
+    color: #333;
+    background: white;
+    border: 1px solid grey;
+    font-size: 12pt;
+    border-collapse: collapse;
+    margin: 0 0 3rem 0;
+}
+table thead th,
+table tfoot th {
+    color: #777;
+    background: rgba(0,0,0,.1);
+}
+table caption {
+    padding:.5em;
+}
+table th,
+table td {
+    padding: .5em;
+    border: 1px solid lightgrey;
+}
+
+#canvas-container {
+    width: 1750px;
+}
+
+.graph--small {
+    max-width: 800px;
+    display: inline-block!important;
+    margin-right: 50px;
+}
+
+.graph {
+    max-width: 1000px;
+    display: inline-block!important;
+    margin-right: 50px;
+}
+
+.graph--large {
+    max-width: 1200px;
+    display: inline-block!important;
+    margin-right: 50px;
+}
+
+.graph--xlarge {
+    max-width: 1500px;
+    display: inline-block!important;
+    margin-right: 50px;
+}

@@ -1,0 +1,58 @@
+{
+  "name": "whatsappnin",
+  "version": "1.0.0",
+  "description": "App used to find cost savings in the IP AWS estate",
+  "engines": {
+    "node": "^10.15.3"
+  },
+  "main": "app.js",
+  "scripts": {
+    "start": "npm run build && nodemon server/index.js",
+    "build": "parcel build ./index.html",
+    "vault:env": "vault read secret/teams/internal-products/ip-usage-reporter/development | tail -n +3 | awk '{$2=$2};1' | tr \" \" \"=\" > .env",
+    "vault-login": "vault login --method=github token=$VAULT_AUTH_GITHUB_TOKEN"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Financial-Times/ip-usage-reporter.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Financial-Times/ip-usage-reporter/issues"
+  },
+  "homepage": "https://github.com/Financial-Times/ip-usage-reporter#readme",
+  "dependencies": {
+    "@babel/polyfill": "^7.11.5",
+    "@financial-times/health-check": "^1.6.1",
+    "@financial-times/n-logger": "^8.0.0",
+    "@financial-times/sheet-reader": "0.0.0",
+    "bertha-client": "^4.0.1",
+    "body-parser": "^1.19.0",
+    "chart.js": "^2.9.3",
+    "chartjs-plugin-annotation": "^0.5.7",
+    "chartjs-plugin-datalabels": "^0.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "express": "^4.17.1",
+    "express-handlebars": "^3.1.0",
+    "jsdom": "^14.1.0",
+    "moment": "^2.29.0",
+    "node": "^10.15.3",
+    "node-fetch": "^2.6.1",
+    "nodemon": "^2.0.4",
+    "npm": "^6.14.8",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-handlebars": "^0.4.4",
+    "sass": "^1.26.11"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.11.6",
+    "@babel/core": "^7.11.6",
+    "@babel/node": "^7.10.5",
+    "@babel/plugin-proposal-export-default-from": "^7.10.4",
+    "@babel/preset-env": "^7.11.5"
+  },
+  "Heroku-run-build-script": true
+}

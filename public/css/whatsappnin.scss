@@ -1,0 +1,46 @@
+.venue-list-item {
+    padding: 0 5px;
+    color: red;
+}
+
+#event-grid-container {
+
+    .event-container:nth-child(even) {
+        background: #CCC
+    }
+
+    .event-container:nth-child(odd) {
+        background: #FFF
+    }
+}
+
+.event-grid {
+    grid-template-columns: 300px 300px 300px 300px 300px;
+    grid-template-rows: 300px 300px 300px 300px 300px;
+    gap: 0px 0px;
+    grid-auto-flow: row;
+    grid-template-areas:
+        ". . . . ."
+        ". . . . ."
+        ". . . . ."
+        ". . . . ."
+        ". . . . .";
+}
+
+.event-grid-item {
+    display: inline-block;
+    .event-title {
+        width: 280px;
+        font-weight: bold;
+        color: black;
+        margin: 0;
+        display: block;
+    }
+    
+    .event-image {
+        img {
+            max-width: 300px;
+            max-height: 200px;
+        }
+    }
+}
