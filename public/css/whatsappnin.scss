@@ -1,15 +1,17 @@
 .venue-list-item {
     padding: 0 5px;
-    color: red;
+    color: lightgrey;
+    background-color: black;
+    font-size: 15pt;
 }
 
 #event-grid-container {
 
-    .event-container:nth-child(even) {
+    .event-container:nth-child(odd) {
         background: #CCC
     }
 
-    .event-container:nth-child(odd) {
+    .event-container:nth-child(even) {
         background: #FFF
     }
 }
@@ -29,6 +31,7 @@
 
 .event-grid-item {
     display: inline-block;
+    padding: 5px;
     .event-title {
         width: 280px;
         font-weight: bold;
