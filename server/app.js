@@ -10,6 +10,7 @@ const { JSDOM } = require('jsdom');
 const glory = require('./venues/glory');
 const rvt = require('./venues/rvt');
 const dalstonSuperstore = require('./venues/dalston-superstore');
+const fire = require('./venues/fire');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -55,6 +56,20 @@ app.get('/dalston-superstore', cors(), async (req, res) => {
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
 		const response = dalstonSuperstore(document);
+		res.send(response);
+	} catch(err) {
+		console.log(err);
+		res.send([]);
+	}
+});
+
+app.get('/fire', cors(), async (req, res) => {
+	try {
+		const pageHTMLAsText = await fetch(`${process.env.FIRE_URL}`)
+			.then((response) => response.text());
+
+		const { document } = new JSDOM(pageHTMLAsText).window;
+		const response = fire(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);

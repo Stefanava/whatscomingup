@@ -16,6 +16,12 @@ const venues = {
         venueDisplayName: 'Dalston Superstore',
         borderColor: 'lightblue',
         slug: 'dalston-superstore'
+    },
+    fire: {
+        events: [],
+        venueDisplayName: 'Fire',
+        borderColor: 'orange',
+        slug: 'fire'
     }
 };
 

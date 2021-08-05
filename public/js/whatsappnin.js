@@ -43,16 +43,17 @@ const whatsappnin = async () => {
                         'Content-Type': 'application/json'
                     },
                 }).then((data) => data.json());
-            
+                
             // This indicates that the venue's events have loaded
             venueListItem.style.color = borderColor;
     
             // Just adding them into the array in case I need them somewhere in future
             venues[venueKey].events = events;
     
-            events.forEach(({image, date, time, title}) => {
+            events.forEach(({description, image, date, time, title}) => {
                 let eventString = `<div class="event-grid-item" style="background: ${borderColor}">
                                     <div class="event-title">${venueDisplayName}: ${title} ${time ? `(${time})` : ''}</div>
+                                    <div class="event-description"><em>${description || ''}</em></div>
                                     <br>
                                     <div class="event-image">${image}</div>
                                     </div>`;
