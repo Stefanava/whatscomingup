@@ -8,7 +8,6 @@ module.exports = (document) => {
 		});
 	})
 
-
 	allBoxes = allBoxes.map(box => {
 		const dateString = box.querySelector('.post-date').getAttribute('datetime');
 		const eventTime = box.querySelector('.post-time').innerHTML;

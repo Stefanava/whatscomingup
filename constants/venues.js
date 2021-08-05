@@ -34,12 +34,18 @@ const venues = {
         venueDisplayName: 'Two Brewers',
         color: 'brown',
         slug: 'two-brewers'
-    }
+    },
     heaven: {
         events: [],
         venueDisplayName: 'Heaven',
         color: 'lightgoldenrodyellow',
         slug: 'heaven'
+    },
+    xoyo: {
+        events: [],
+        venueDisplayName: 'XOYO',
+        color: 'lightseagreen',
+        slug: 'xoyo'
     }
 };
 

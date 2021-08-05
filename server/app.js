@@ -14,6 +14,7 @@ const fire = require('./venues/fire');
 const lightbox = require('./venues/lightbox');
 const twoBrewers = require('./venues/two-brewers');
 const heaven = require('./venues/heaven');
+const xoyo = require('./venues/xoyo');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -115,6 +116,20 @@ app.get('/heaven', cors(), async (req, res) => {
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
 		const response = heaven(document);
+		res.send(response);
+	} catch(err) {
+		console.log(err);
+		res.send([]);
+	}
+});
+
+app.get('/xoyo', cors(), async (req, res) => {
+	try {
+		const pageHTMLAsText = await fetch(`${process.env.XOYO_URL}`)
+			.then((response) => response.text());
+
+		const { document } = new JSDOM(pageHTMLAsText).window;
+		const response = xoyo(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
