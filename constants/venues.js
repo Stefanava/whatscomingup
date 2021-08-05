@@ -2,38 +2,44 @@ const venues = {
     glory: {
         events: [],
         venueDisplayName: 'The Glory',
-        borderColor: 'pink',
+        color: 'pink',
 		slug: 'glory'
     },
     rvt: {
         events: [],
         venueDisplayName: 'RVT',
-        borderColor: 'green',
+        color: 'green',
         slug: 'rvt'
     },
     ds: {
         events: [],
         venueDisplayName: 'Dalston Superstore',
-        borderColor: 'lightblue',
+        color: 'lightblue',
         slug: 'dalston-superstore'
     },
     fire: {
         events: [],
         venueDisplayName: 'Fire',
-        borderColor: 'orange',
+        color: 'orange',
         slug: 'fire'
     },
     lightbox: {
         events: [],
         venueDisplayName: 'Lightbox',
-        borderColor: 'lightcoral',
+        color: 'lightcoral',
         slug: 'lightbox'
     },
     twoBrewers: {
         events: [],
         venueDisplayName: 'Two Brewers',
-        borderColor: 'brown',
+        color: 'brown',
         slug: 'two-brewers'
+    }
+    heaven: {
+        events: [],
+        venueDisplayName: 'Heaven',
+        color: 'lightgoldenrodyellow',
+        slug: 'heaven'
     }
 };
 

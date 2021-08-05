@@ -34,7 +34,7 @@ upcomingDays.forEach(date => {
 const whatsappnin = async () => {
     try {
         for(const venueKey in venues) {
-            const { borderColor, slug, venueDisplayName } = venues[venueKey];
+            const { color, slug, venueDisplayName } = venues[venueKey];
             const venueListItem = document.getElementById(`venue-list-item-${venueKey}`);
             const events =  await fetch(`${process.env.APP_BASE_URL}/${slug}`, {
                     method: 'GET',
@@ -43,15 +43,15 @@ const whatsappnin = async () => {
                         'Content-Type': 'application/json'
                     },
                 }).then((data) => data.json());
-                
+
             // This indicates that the venue's events have loaded
-            venueListItem.style.color = borderColor;
+            venueListItem.style.color = color;
     
             // Just adding them into the array in case I need them somewhere in future
             venues[venueKey].events = events;
     
             events.forEach(({description, image, date, time, title}) => {
-                let eventString = `<div class="event-grid-item" style="background: ${borderColor}">
+                let eventString = `<div class="event-grid-item" style="background: ${color}">
                                     <div class="event-title">${venueDisplayName}: ${title} ${time ? `(${time})` : ''}</div>
                                     <div class="event-description"><em>${description || ''}</em></div>
                                     <br>

@@ -1,7 +1,5 @@
 module.exports = (document) => {
 	let events = document.querySelector('.events-inner').querySelectorAll('.event-details');
-	
-	console.log(events);
 
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
