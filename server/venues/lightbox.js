@@ -3,7 +3,7 @@ module.exports = (document) => {
 
 	eventHolders = Array.from(eventHolders).map(eventHolder => {
 		const imageLink = eventHolder.querySelector('.photo').querySelector('.value-title').getAttribute('title');
-		const link = eventHolder.querySelector('.url').getAttribute('href').replace('/whats-on/London/Fire/', '');
+		const link = eventHolder.querySelector('.url').getAttribute('href').replace('/whats-on/London/Lightbox/', '');
 
 		return {
 			date: new Date(eventHolder.querySelector('.dtstart').querySelector('span').getAttribute('title')),

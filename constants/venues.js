@@ -22,6 +22,12 @@ const venues = {
         venueDisplayName: 'Fire',
         borderColor: 'orange',
         slug: 'fire'
+    },
+    lightbox: {
+        events: [],
+        venueDisplayName: 'Lightbox',
+        borderColor: 'lightcoral',
+        slug: 'lightbox'
     }
 };
 

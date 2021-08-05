@@ -11,6 +11,7 @@ const glory = require('./venues/glory');
 const rvt = require('./venues/rvt');
 const dalstonSuperstore = require('./venues/dalston-superstore');
 const fire = require('./venues/fire');
+const lightbox = require('./venues/lightbox');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -70,6 +71,20 @@ app.get('/fire', cors(), async (req, res) => {
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
 		const response = fire(document);
+		res.send(response);
+	} catch(err) {
+		console.log(err);
+		res.send([]);
+	}
+});
+
+app.get('/lightbox', cors(), async (req, res) => {
+	try {
+		const pageHTMLAsText = await fetch(`${process.env.LIGHTBOX_URL}`)
+			.then((response) => response.text());
+
+		const { document } = new JSDOM(pageHTMLAsText).window;
+		const response = lightbox(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
