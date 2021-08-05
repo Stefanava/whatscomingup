@@ -28,6 +28,12 @@ const venues = {
         venueDisplayName: 'Lightbox',
         borderColor: 'lightcoral',
         slug: 'lightbox'
+    },
+    twoBrewers: {
+        events: [],
+        venueDisplayName: 'Two Brewers',
+        borderColor: 'brown',
+        slug: 'two-brewers'
     }
 };
 

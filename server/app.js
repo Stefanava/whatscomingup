@@ -12,6 +12,7 @@ const rvt = require('./venues/rvt');
 const dalstonSuperstore = require('./venues/dalston-superstore');
 const fire = require('./venues/fire');
 const lightbox = require('./venues/lightbox');
+const twoBrewers = require('./venues/two-brewers');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -85,6 +86,20 @@ app.get('/lightbox', cors(), async (req, res) => {
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
 		const response = lightbox(document);
+		res.send(response);
+	} catch(err) {
+		console.log(err);
+		res.send([]);
+	}
+});
+
+app.get('/two-brewers', cors(), async (req, res) => {
+	try {
+		const pageHTMLAsText = await fetch(`${process.env.TWO_BREWERS_URL}`)
+			.then((response) => response.text());
+
+		const { document } = new JSDOM(pageHTMLAsText).window;
+		const response = twoBrewers(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
