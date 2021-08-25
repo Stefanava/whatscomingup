@@ -6,7 +6,7 @@ const moment = require('moment');
 const venues = require('../../constants/venues');
 // Create a list of venues at the top of the page
 const venueListDiv = document.getElementById('venue-list');
-for(const venueKey in venues) {
+for (const venueKey in venues) {
     const { venueDisplayName } = venues[venueKey];
     const span = document.createElement('span');
     span.id = `venue-list-item-${venueKey}`;
@@ -19,7 +19,7 @@ const eventGridContainer = document.getElementById('event-grid-container');
 
 const upcomingDays = [];
 
-for(let i=0;i<1000;i++) {
+for (let i = 0; i < 1000; i++) {
     let date = new Date();
     date.setDate(date.getDate() + i);
     upcomingDays.push(date);
@@ -31,43 +31,50 @@ upcomingDays.forEach(date => {
     eventGridContainer.innerHTML = eventGridContainer.innerHTML + dayGrid;
 });
 
+const getVenue = async (venueKey) => {
+    const { color, slug, venueDisplayName } = venues[venueKey];
+    const venueListItem = document.getElementById(`venue-list-item-${venueKey}`);
+    const events = await fetch(`${process.env.APP_BASE_URL}/${slug}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    }).then((data) => data.json());
+
+    // This indicates that the venue's events have loaded
+    venueListItem.style.color = color;
+
+    // Just adding them into the array in case I need them somewhere in future
+    venues[venueKey].events = events;
+
+    events.forEach(({ description, image, date, time, title }) => {
+        let eventString = `<div class="event-grid-item" style="background: ${color}">
+                            <div class="event-title">${venueDisplayName}: ${title} ${time ? `(${time})` : ''}</div>
+                            <div class="event-description"><em>${description || ''}</em></div>
+                            <br>
+                            <div class="event-image">${image}</div>
+                            </div>`;
+        const dayGrid = document.querySelector(`#event-container-date-${new Date(date).toDateString().split(' ').join("-")}`);
+        if (dayGrid) dayGrid.innerHTML = dayGrid.innerHTML + eventString;
+    });
+}
+
 const whatsappnin = async () => {
     try {
-        for(const venueKey in venues) {
-            const { color, slug, venueDisplayName } = venues[venueKey];
-            const venueListItem = document.getElementById(`venue-list-item-${venueKey}`);
-            const events =  await fetch(`${process.env.APP_BASE_URL}/${slug}`, {
-                    method: 'GET',
-                    headers: { 
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                }).then((data) => data.json());
-
-            // This indicates that the venue's events have loaded
-            venueListItem.style.color = color;
-    
-            // Just adding them into the array in case I need them somewhere in future
-            venues[venueKey].events = events;
-    
-            events.forEach(({description, image, date, time, title}) => {
-                let eventString = `<div class="event-grid-item" style="background: ${color}">
-                                    <div class="event-title">${venueDisplayName}: ${title} ${time ? `(${time})` : ''}</div>
-                                    <div class="event-description"><em>${description || ''}</em></div>
-                                    <br>
-                                    <div class="event-image">${image}</div>
-                                    </div>`;
-                const dayGrid = document.querySelector(`#event-container-date-${new Date(date).toDateString().split(' ').join("-")}`);
-                if(dayGrid) dayGrid.innerHTML = dayGrid.innerHTML + eventString;
-            });
-        }
-        // Once all venues and events added, hide the events containers with no events
-        const eventContainers = document.getElementsByClassName('event-container');
-        Array.from(eventContainers).forEach(container => {
-            if(!container.querySelector('div')) {
-                container.style.display = 'none';
-            }
+        Object.entries(venues).forEach(([key, venue]) => {
+            console.log(key);
+            getVenue(key);
         });
+
+
+        // Once all venues and events added, hide the events containers with no events
+        // const eventContainers = document.getElementsByClassName('event-container');
+        // Array.from(eventContainers).forEach(container => {
+        //     if(!container.querySelector('div')) {
+        //         container.style.display = 'none';
+        //     }
+        // });
     } catch (error) {
         console.log(error);
     }
