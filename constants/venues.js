@@ -46,6 +46,12 @@ const venues = {
         venueDisplayName: 'XOYO',
         color: 'lightseagreen',
         slug: 'xoyo'
+    },
+    bgwmc: {
+        events: [],
+        venueDisplayName: 'Beth Gr Work Men',
+        color: 'crimson',
+        slug: 'bgwmc'
     }
 };
 

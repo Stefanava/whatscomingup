@@ -17,17 +17,19 @@
 }
 
 .event-grid {
-    grid-template-columns: 300px 300px 300px 300px 300px;
-    grid-template-rows: 300px 300px 300px 300px 300px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
     gap: 0px 0px;
     grid-auto-flow: row;
     grid-template-areas:
-        ". . . . ."
-        ". . . . ."
-        ". . . . ."
-        ". . . . ."
-        ". . . . .";
-}
+      ". . . . ."
+      ". . . . ."
+      ". . . . ."
+      ". . . . ."
+      ". . . . .";
+  }
+  
 
 .event-grid-item {
     display: inline-block;
