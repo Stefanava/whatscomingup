@@ -1,1 +1,1 @@
-retrieveEvents: node js/utils/scrape-venues.js
+events: node js/utils/scrape-venues.js
