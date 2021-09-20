@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 module.exports = async () => {
 	const events = await fetch(`${process.env.APP_BASE_URL}/get-events`, {
 		method: 'GET',

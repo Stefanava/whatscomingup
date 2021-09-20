@@ -18,7 +18,7 @@ module.exports = (document) => {
 		return {
 			date: new Date(year, month - 1, day),
 			image,
-			title: event.querySelector('.event-thumbnail__title').innerHTML
+			title: `<a target="_blank" href=${aNode.getAttribute("href")}>${event.querySelector('.event-thumbnail__title').innerHTML}<a/>`
 		};
 	});
 	return eventThumbnails;

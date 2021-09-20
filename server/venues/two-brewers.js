@@ -5,8 +5,9 @@ module.exports = (document) => {
 
 	events = Array.from(events).map(event => {
 		const image = event.querySelector('a');
+		const imageUrl = image.getAttribute('href');
 		const eventInfo = event.querySelector('article').querySelector('.event-info');
-		const title = eventInfo.querySelector('.event-title').innerHTML;
+		const title = `<a target="_blank" href="${imageUrl}">${eventInfo.querySelector('.event-title').innerHTML}</a>`;
 		const time = eventInfo.querySelector('.event-time').innerHTML;
 		const dayString = eventInfo.querySelector('.day').innerHTML;
 		const monthString = eventInfo.querySelector('.month').innerHTML;
@@ -18,6 +19,7 @@ module.exports = (document) => {
 		return {
 			date: new Date(dateString),
 			image: image.outerHTML,
+			image_url: imageUrl,
 			title: title,
 			time: time,
 		};

@@ -14,12 +14,14 @@ module.exports = (document) => {
 		const postThumbNode = box.querySelector('.post-thumb')
 		const imgNode = postThumbNode.querySelector('img');
 		const aNode = document.createElement('a');
-		aNode.setAttribute("href", box.querySelector('a'));
+		const imageUrl = box.querySelector('a');
+		aNode.setAttribute("href", imageUrl);
+		aNode.setAttribute("target", '_blank');
 		aNode.appendChild(imgNode);
 		return {
 			date: new Date(dateString),
 			image: aNode.outerHTML,
-			title: box.querySelector('.post-title').querySelector('span').innerHTML,
+			title: `<a target="_blank" href="${imageUrl}">${box.querySelector('.post-title').querySelector('span').innerHTML}</a>`,
 			time: eventTime
 		};
 	});

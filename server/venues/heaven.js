@@ -14,11 +14,13 @@ module.exports = (document) => {
 		let title = eventDetails.querySelector('.title').innerHTML;
 		const support = eventDetails.querySelector('.support').innerHTML;
 		title = `${title} ${support}`;
+		const imageUrl = aNode.getAttribute('href');
 
 		return {
 			date: new Date(date),
 			image: aNode.outerHTML,
-			title: title,
+			image_url: imageUrl,
+			title: `<a target="_blank" href="${imageUrl}">${title}</a>`,
 			time: new Date(date).toLocaleTimeString(),
 		};
 	});

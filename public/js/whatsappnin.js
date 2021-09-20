@@ -1,93 +1,70 @@
 require('dotenv').config();
 require('@babel/polyfill');
-const fetch = require('node-fetch');
 const moment = require('moment');
 const getVenues = require('./utils/get-venues');
 const getEvents = require('./utils/get-events');
 
-const venues = {};
+const eventGridContainer = document.getElementById('event-grid-container');
+const venueListDiv = document.getElementById('venue-list');
+        
+const upcomingDays = [];
 
-const getVenue = async (venueKey) => {
-    const { color, slug, name } = venues[venueKey];
-    const venueListItem = document.getElementById(`venue-list-item-${venueKey}`);
-    const events = await fetch(`${process.env.APP_BASE_URL}/${slug}`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-    }).then((data) => data.json());
-
-    // This indicates that the venue's events have loaded
-    venueListItem.style.color = color;
-
-    // Just adding them into the array in case I need them somewhere in future
-    venues[venueKey].events = events;
-
-    events.forEach(({ description, image, date, time, title }) => {
-        let eventString = `<div class="event-grid-item" style="background: ${color}">
-                            <div class="event-title">${name}: ${title} ${time ? `(${time})` : ''}</div>
-                            <div class="event-description"><em>${description || ''}</em></div>
-                            <br>
-                            <div class="event-image">${image}</div>
-                            </div>`;
-        const dayGrid = document.querySelector(`#event-container-date-${new Date(date).toDateString().split(' ').join("-")}`);
-        if (dayGrid) dayGrid.innerHTML = dayGrid.innerHTML + eventString;
-    });
+for (let i = 0; i < 1000; i++) {
+    let date = new Date();
+    date.setDate(date.getDate() + i);
+    upcomingDays.push(date);
 }
+
+// Generate the event containers by date
+upcomingDays.forEach(date => {
+    const dayGrid = `<div class="event-container" id="event-container-date-${date.toDateString().split(' ').join("-")}"><h2>${moment(date).format('dddd Do MMMM')}</h2></div>`;
+    eventGridContainer.innerHTML = eventGridContainer.innerHTML + dayGrid;
+});
 
 const run = async () => {
     try {
-        const allVenues = await getVenues();
+        const allVenues = await getVenues({});
         const allEvents = await getEvents();
-        
-        console.log(allVenues);
         console.log(allEvents);
-        
-        allVenues.forEach(venue => {
-            venues[venue.slug] = { ...venue }
-        });
-        
-        console.log(venues);
 
-        // Create a list of venues at the top of the page
-        const venueListDiv = document.getElementById('venue-list');
-        for (const venueKey in venues) {
-            const { name } = venues[venueKey];
+        const venues = allVenues.map(venue => {
+            return { 
+                events: allEvents.filter(({ venue_id }) => venue_id === venue.id),
+                ...venue
+            };
+        });
+
+        // Build the venues object adding the events
+        venues.forEach(venue => {
+            
+            // Create a list of venues at the top of the page
+            const { color, name, slug } = venue;
             const span = document.createElement('span');
-            span.id = `venue-list-item-${venueKey}`;
+            span.id = `venue-list-item-${slug}`;
             span.className = 'venue-list-item';
             span.innerHTML = `${name}`;
+            span.style.color = color;
             venueListDiv.appendChild(span);
-        }
-        
-        const eventGridContainer = document.getElementById('event-grid-container');
-        
-        const upcomingDays = [];
-        
-        for (let i = 0; i < 1000; i++) {
-            let date = new Date();
-            date.setDate(date.getDate() + i);
-            upcomingDays.push(date);
-        }
-        
-        // Generate the event containers by date
-        upcomingDays.forEach(date => {
-            const dayGrid = `<div class="event-container" id="event-container-date-${date.toDateString().split(' ').join("-")}"><h2>${moment(date).format('dddd Do MMMM')}</h2></div>`;
-            eventGridContainer.innerHTML = eventGridContainer.innerHTML + dayGrid;
-        });
 
-        Object.keys(venues).forEach((key) => {
-            getVenue(key);
+            venue.events.forEach(({ description, image, date, time, title }) => {
+                let eventString = `<div class="event-grid-item" style="background: ${color}">
+                                    <div class="event-title">${name}: ${title} ${time ? `(${time})` : ''}</div>
+                                    <div class="event-description"><em>${description || ''}</em></div>
+                                    <br>
+                                    <div class="event-image">${image}</div>
+                                    </div>`;
+                const dayGrid = document.querySelector(`#event-container-date-${new Date(date).toDateString().split(' ').join("-")}`);
+                if (dayGrid) dayGrid.innerHTML = dayGrid.innerHTML + eventString;
+            });
         });
 
         // Once all venues and events added, hide the events containers with no events
-        // const eventContainers = document.getElementsByClassName('event-container');
-        // Array.from(eventContainers).forEach(container => {
-        //     if(!container.querySelector('div')) {
-        //         container.style.display = 'none';
-        //     }
-        // });
+        const eventContainers = document.getElementsByClassName('event-container');
+        Array.from(eventContainers).forEach(container => {
+            if(!container.querySelector('div')) {
+                container.style.display = 'none';
+            }
+        });
     } catch (error) {
         console.log(error);
     }
