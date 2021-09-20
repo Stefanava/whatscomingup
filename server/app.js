@@ -38,6 +38,21 @@ app.get('/get-venues', cors(), async (req, res) => {
 	}
 });
 
+app.get('/get-events', cors(), async (req, res) => {
+	try {
+		const connection = mysql.createConnection(process.env.JAWSDB_URL);
+		connection.connect();
+		connection.query(`SELECT * from events`, function(err, rows, fields) {
+			if (err) throw err;
+			res.json(rows);
+		});
+		connection.end();
+	} catch(err) {
+		console.log(err);
+		res.send([]);
+	}
+});
+
 app.get('/glory', cors(), async (req, res) => {
 	try {
 		const pageHTMLAsText = await fetch(`${process.env.GLORY_URL}`)

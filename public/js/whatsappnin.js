@@ -2,6 +2,8 @@ require('dotenv').config();
 require('@babel/polyfill');
 const fetch = require('node-fetch');
 const moment = require('moment');
+const getVenues = require('./utils/get-venues');
+const getEvents = require('./utils/get-events');
 
 const venues = {};
 
@@ -36,15 +38,11 @@ const getVenue = async (venueKey) => {
 
 const run = async () => {
     try {
-        const allVenues = await fetch(`${process.env.APP_BASE_URL}/get-venues`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-        }).then((data) => data.json());
+        const allVenues = await getVenues();
+        const allEvents = await getEvents();
         
         console.log(allVenues);
+        console.log(allEvents);
         
         allVenues.forEach(venue => {
             venues[venue.slug] = { ...venue }
