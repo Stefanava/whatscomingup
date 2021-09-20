@@ -13,6 +13,7 @@ const twoBrewers = require('./../../../server/venues/two-brewers');
 const xoyo = require('./../../../server/venues/xoyo');
 
 module.exports = async () => {
+	console.log("Start scraping venues");
 	const eventProcessingObj = {
 		'bgwmc': bgwmc,
 		'dalston-superstore': dalstonSuperstore,
