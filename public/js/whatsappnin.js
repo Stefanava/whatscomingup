@@ -46,13 +46,19 @@ const run = async () => {
             span.style.color = color;
             venueListDiv.appendChild(span);
 
-            venue.events.forEach(({ description, image, date, time, title }) => {
+            venue.events.forEach(({ description, image_url, link, date, time, title }) => {
+
+                const titleHtml = `<a target="_blank" href="${link}">${title}</a>`;
+
                 let eventString = `<div class="event-grid-item" style="background: ${color}">
-                                    <div class="event-title">${name}: ${title} ${time ? `(${time})` : ''}</div>
+                                    <div class="event-title">${name}: ${titleHtml} ${time ? `(${time})` : ''}</div>
                                     <div class="event-description"><em>${description || ''}</em></div>
                                     <br>
-                                    <div class="event-image">${image}</div>
+                                    <div class="event-image"><a href="${link}"><img src="${image_url}"></a></div>
                                     </div>`;
+                if(venue.id === 8) {
+                    console.log(eventString);
+                }
                 const dayGrid = document.querySelector(`#event-container-date-${new Date(date).toDateString().split(' ').join("-")}`);
                 if (dayGrid) dayGrid.innerHTML = dayGrid.innerHTML + eventString;
             });

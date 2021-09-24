@@ -15,10 +15,12 @@ module.exports = (document) => {
 			year += 1;
 		}
 
+		// date, title, image_url, time, cost, description, venue_id, link
 		return {
 			date: new Date(year, month - 1, day),
-			image,
-			title: `<a target="_blank" href=${aNode.getAttribute("href")}>${event.querySelector('.event-thumbnail__title').innerHTML}<a/>`
+			image_url: aNode.style['background-image'].substring(4),
+			link: aNode.getAttribute("href"),
+			title: event.querySelector('.event-thumbnail__title').innerHTML
 		};
 	});
 	return eventThumbnails;

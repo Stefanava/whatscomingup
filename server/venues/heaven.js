@@ -3,24 +3,21 @@ module.exports = (document) => {
 
 	cards = Array.from(cards).map(card => {
 		const imageAddress = card.querySelector('.d-img').getAttribute('data-url');
-		const img = document.createElement('img');
-		img.setAttribute('src', imageAddress);
-
 		const aNode = card.querySelector('header').querySelector('a');
-		aNode.innerHTML = img.outerHTML;
+		const link = aNode.getAttribute('href');
 		
 		const eventDetails = card.querySelector('.event-details');
 		const date = eventDetails.querySelector('.datetime').getAttribute('content');
 		let title = eventDetails.querySelector('.title').innerHTML;
 		const support = eventDetails.querySelector('.support').innerHTML;
 		title = `${title} ${support}`;
-		const imageUrl = aNode.getAttribute('href');
 
+		// date, title, image_url, time, cost, description, venue_id, link
 		return {
 			date: new Date(date),
-			image: aNode.outerHTML,
-			image_url: imageUrl,
-			title: `<a target="_blank" href="${imageUrl}">${title}</a>`,
+			image_url: imageAddress,
+			title: title,
+			link,
 			time: new Date(date).toLocaleTimeString(),
 		};
 	});

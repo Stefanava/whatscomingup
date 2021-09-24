@@ -7,7 +7,7 @@ require('dotenv').config();
 const cors = require('cors')
 const mysql = require('mysql');
 const { JSDOM } = require('jsdom');
-const { glory } = require('./venues/glory');
+const glory = require('./venues/glory');
 const rvt = require('./venues/rvt');
 const dalstonSuperstore = require('./venues/dalston-superstore');
 const fire = require('./venues/fire');
@@ -122,6 +122,7 @@ app.get('/fire', cors(), async (req, res) => {
 
 app.get('/lightbox', cors(), async (req, res) => {
 	try {
+		console.log(`${process.env.LIGHTBOX_URL}`);
 		const pageHTMLAsText = await fetch(`${process.env.LIGHTBOX_URL}`)
 			.then((response) => response.text());
 

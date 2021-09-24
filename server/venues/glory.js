@@ -1,5 +1,4 @@
-const glory = (document) => {
-
+module.exports = (document) => {
 	let listItems = document.querySelector('#whatson').querySelectorAll('li');;
 	
 	listItems = Array.from(listItems).map(li => {
@@ -8,19 +7,16 @@ const glory = (document) => {
 		const [day, month, year] = halfDateString.substr(1, halfDateString.length-4).split("/");
 		const date = new Date(year, month - 1, day);
 		const aNode = li.querySelector('a');
-		aNode.setAttribute("target", '_blank');
-		const imageUrl = aNode.getAttribute('href');
+		const link = aNode.getAttribute('href');
+		const imageUrl = aNode.querySelector('img').getAttribute('src');
 
+		// date, title, image_url, time, cost, description, venue_id, link
 		return {
 			date,
-			image: li.querySelector('a').outerHTML,
 			image_url: imageUrl,
-			title: `<a target="_blank" href="${imageUrl}">${li.querySelector('h2').querySelector('a').innerHTML}</a>`
+			link,
+			title: li.querySelector('h2').querySelector('a').innerHTML
 		};
 	});
 	return listItems;
-};
-
-module.exports = {
-	glory
 };

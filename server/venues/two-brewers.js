@@ -4,10 +4,10 @@ module.exports = (document) => {
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 	events = Array.from(events).map(event => {
-		const image = event.querySelector('a');
-		const imageUrl = image.getAttribute('href');
+		const aNode = event.querySelector('a');
+		const imageUrl = aNode.querySelector('img').getAttribute('src');
+		const link = `${process.env.TWO_BREWERS_URL}${aNode.getAttribute('href')}`;
 		const eventInfo = event.querySelector('article').querySelector('.event-info');
-		const title = `<a target="_blank" href="${imageUrl}">${eventInfo.querySelector('.event-title').innerHTML}</a>`;
 		const time = eventInfo.querySelector('.event-time').innerHTML;
 		const dayString = eventInfo.querySelector('.day').innerHTML;
 		const monthString = eventInfo.querySelector('.month').innerHTML;
@@ -16,11 +16,12 @@ module.exports = (document) => {
 		if(month.toString().length === 1) month = `0${month}`;
 		const dateString = `${month}-${dayString}-${new Date().getFullYear()}`;		
 
+		// date, title, image_url, time, cost, description, venue_id, link
 		return {
 			date: new Date(dateString),
-			image: image.outerHTML,
 			image_url: imageUrl,
-			title: title,
+			link: link,
+			title: eventInfo.querySelector('.event-title').innerHTML,
 			time: time,
 		};
 	});

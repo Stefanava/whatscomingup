@@ -6,22 +6,20 @@ module.exports = (document) => {
 		Array.from(boxes).forEach(box => {
 			allBoxes.push(box);
 		});
-	})
+	});
 
 	allBoxes = allBoxes.map(box => {
 		const dateString = box.querySelector('.post-date').getAttribute('datetime');
 		const eventTime = box.querySelector('.post-time').innerHTML;
-		const postThumbNode = box.querySelector('.post-thumb')
-		const imgNode = postThumbNode.querySelector('img');
-		const aNode = document.createElement('a');
-		const imageUrl = box.querySelector('a');
-		aNode.setAttribute("href", imageUrl);
-		aNode.setAttribute("target", '_blank');
-		aNode.appendChild(imgNode);
+		const link = box.querySelector('a').getAttribute('href');
+		const image_url = box.querySelector('img').getAttribute('src');
+
+		// date, title, image_url, time, cost, description, venue_id, link
 		return {
 			date: new Date(dateString),
-			image: aNode.outerHTML,
-			title: `<a target="_blank" href="${imageUrl}">${box.querySelector('.post-title').querySelector('span').innerHTML}</a>`,
+			image_url,
+			link,
+			title: box.querySelector('.post-title').querySelector('span').innerHTML,
 			time: eventTime
 		};
 	});
