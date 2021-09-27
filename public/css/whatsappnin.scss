@@ -7,6 +7,13 @@
 
 #event-grid-container {
 
+    .event-contents {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, 300px);
+        grid-gap: 32px;
+        grid-auto-flow: dense;
+    }
+
     .event-container:nth-child(odd) {
         background: #CCC
     }
@@ -15,25 +22,11 @@
         background: #FFF
     }
 }
-
-.event-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
-    gap: 0px 0px;
-    grid-auto-flow: row;
-    grid-template-areas:
-      ". . . . ."
-      ". . . . ."
-      ". . . . ."
-      ". . . . ."
-      ". . . . .";
-  }
   
 
 .event-grid-item {
-    display: inline-block;
-    padding: 5px;
+    
+    padding: 10px;
     .event-title {
         width: 280px;
         font-weight: bold;
@@ -57,8 +50,7 @@
     
     .event-image {
         img {
-            max-width: 300px;
-            max-height: 200px;
+            max-width: 250px;
         }
     }
 }

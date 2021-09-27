@@ -17,7 +17,7 @@ for (let i = 0; i < 1000; i++) {
 
 // Generate the event containers by date
 upcomingDays.forEach(date => {
-    const dayGrid = `<div class="event-container" id="event-container-date-${date.toDateString().split(' ').join("-")}"><h2>${moment(date).format('dddd Do MMMM')}</h2></div>`;
+    const dayGrid = `<div class="event-container" id="event-container-date-${date.toDateString().split(' ').join("-")}"><h2>${moment(date).format('dddd Do MMMM')}</h2><div class="event-contents"></div></div>`;
     eventGridContainer.innerHTML = eventGridContainer.innerHTML + dayGrid;
 });
 
@@ -59,7 +59,7 @@ const run = async () => {
                 if(venue.id === 8) {
                     console.log(eventString);
                 }
-                const dayGrid = document.querySelector(`#event-container-date-${new Date(date).toDateString().split(' ').join("-")}`);
+                const dayGrid = document.querySelector(`#event-container-date-${new Date(date).toDateString().split(' ').join("-")} div`);
                 if (dayGrid) dayGrid.innerHTML = dayGrid.innerHTML + eventString;
             });
         });
