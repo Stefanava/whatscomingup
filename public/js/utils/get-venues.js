@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 module.exports = async ({
 	active='TRUE',
 }) => {
-	const venues = await fetch(`${process.env.APP_BASE_URL}/get-venues`, {
+	let venues = await fetch(`${process.env.APP_BASE_URL}/get-venues`, {
 		method: 'POST',
 		headers: {
 			'Accept': 'application/json',
@@ -12,5 +12,12 @@ module.exports = async ({
 			active
 		})
 	}).then((data) => data.json());
-	return venues;
+
+	return venues.map(venue => {
+		return {
+			...venue,
+			active: venue.active === 'TRUE',
+			id: Number(venue.id)
+		};
+	});;
 };

@@ -31,7 +31,10 @@ module.exports = async () => {
 					description,
 					link
 				} = event;
-				query += `('${date || ''}', '${title ? title.replace(/'/g, "") : ''}', '${image_url || ''}', '${time || ''}', '${cost || ''}', '${description ? description.replace(/'/g, "") : ''}', '${id}', '${link}'), `;
+				// This ensures we only get upcoming events
+				if(new Date().getTime() <= new Date(date).getTime()) {
+					query += `('${date || ''}', '${title ? title.replace(/'/g, "") : ''}', '${image_url || ''}', '${time || ''}', '${cost || ''}', '${description ? description.replace(/'/g, "") : ''}', '${id}', '${link}'), `;
+				}
 			});
 			query = query.substring(0, query.length - 2);
 			queries.push(query);

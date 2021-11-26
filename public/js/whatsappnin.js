@@ -25,14 +25,15 @@ const run = async () => {
     try {
         const allVenues = await getVenues({});
         const allEvents = await getEvents();
-        console.log(allEvents);
 
         const venues = allVenues.map(venue => {
-            return { 
+            return {
                 events: allEvents.filter(({ venue_id }) => venue_id === venue.id),
                 ...venue
             };
         });
+
+        console.log(venues);
 
         // Build the venues object adding the events
         venues.forEach(venue => {
@@ -56,7 +57,7 @@ const run = async () => {
                                     <br>
                                     <div class="event-image"><a href="${link}"><img src="${image_url}"></a></div>
                                     </div>`;
-                if(venue.id === 8) {
+                if(venue.id === 1) {
                     console.log(eventString);
                 }
                 const dayGrid = document.querySelector(`#event-container-date-${new Date(date).toDateString().split(' ').join("-")} div`);
