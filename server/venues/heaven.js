@@ -1,4 +1,8 @@
-module.exports = (document) => {
+const getEventDetails = (document) => {
+	return {};
+};
+
+const getAllEvents = (document) => {
 	let cards = document.querySelectorAll('.event-card');
 
 	cards = Array.from(cards).map(card => {
@@ -23,4 +27,9 @@ module.exports = (document) => {
 	});
 
 	return(cards);
+};
+
+module.exports = {
+	getAllEvents,
+	getEventDetails
 }

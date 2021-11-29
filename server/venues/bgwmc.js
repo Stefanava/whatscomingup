@@ -1,4 +1,8 @@
-module.exports = (document) => {
+const getEventDetails = (document) => {
+	return {};
+};
+
+const getAllEvents = (document) => {
 
 	let eventHolders = document.querySelectorAll('td[bgcolor="#FF0000"]');
 
@@ -20,4 +24,9 @@ module.exports = (document) => {
 	});
 
 	return eventHolders;
+};
+
+module.exports = {
+	getAllEvents,
+	getEventDetails
 }

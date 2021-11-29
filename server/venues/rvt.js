@@ -1,4 +1,9 @@
-module.exports = (document) => {
+
+const getEventDetails = () => {
+	return {};
+};
+
+const getAllEvents = (document) => {
 	const months = document.querySelector('#month').querySelectorAll('.month');
 	let allBoxes = [];
 	Array.from(months).forEach(month => {
@@ -25,4 +30,9 @@ module.exports = (document) => {
 	});
 
 	return(allBoxes);
+}
+
+module.exports = {
+	getAllEvents,
+	getEventDetails
 }

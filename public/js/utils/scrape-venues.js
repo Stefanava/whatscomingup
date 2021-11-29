@@ -46,7 +46,7 @@ module.exports = async () => {
 	try {
 		connection.query(`TRUNCATE TABLE events`, function(err, rows, fields) {
 			if (err) throw err;
-			console.log("Successfully inserted events into DB");
+			console.log("Successfully deleted events from events table");
 			return rows;
 		});
 		queries.forEach((query, index ) => {

@@ -1,4 +1,8 @@
-module.exports = (document) => {
+const getEventDetails = () => {
+	return {};
+};
+
+const getAllEvents = (document) => {
 	let eventHolders = document.querySelector('#content').querySelectorAll('.event-holder');
 
 	eventHolders = Array.from(eventHolders).map(eventHolder => {
@@ -16,4 +20,9 @@ module.exports = (document) => {
 	});
 
 	return eventHolders;
+}
+
+module.exports = {
+	getAllEvents,
+	getEventDetails
 }

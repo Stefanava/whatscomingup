@@ -1,5 +1,13 @@
-module.exports = (document) => {
-	let listItems = document.querySelector('#whatson').querySelectorAll('li');;
+const getEventDetails = (document) => {
+	let wpb_wrapper = document.querySelectorAll('.wpb_content_element > .wpb_wrapper');
+	const time = wpb_wrapper[1].querySelector('h3').innerHTML.replace('Time: ', '');
+	return {
+		time
+	};
+};
+
+const getAllEvents = (document) => {
+	let listItems = document.querySelector('#whatson').querySelectorAll('li');
 	
 	listItems = Array.from(listItems).map(li => {
 		const dateString = li.querySelector('span').innerHTML.trim();
@@ -20,3 +28,8 @@ module.exports = (document) => {
 	});
 	return listItems;
 };
+
+module.exports = {
+	getAllEvents,
+	getEventDetails
+}

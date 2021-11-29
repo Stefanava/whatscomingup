@@ -57,9 +57,6 @@ const run = async () => {
                                     <br>
                                     <div class="event-image"><a href="${link}"><img src="${image_url}"></a></div>
                                     </div>`;
-                if(venue.id === 1) {
-                    console.log(eventString);
-                }
                 const dayGrid = document.querySelector(`#event-container-date-${new Date(date).toDateString().split(' ').join("-")} div`);
                 if (dayGrid) dayGrid.innerHTML = dayGrid.innerHTML + eventString;
             });

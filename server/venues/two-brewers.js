@@ -1,4 +1,8 @@
-module.exports = (document) => {
+const getEventDetails = (document) => {
+	return {};
+};
+
+const getAllEvents = (document) => {
 	let events = document.querySelector('.events-inner').querySelectorAll('.event-details');
 
 	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -27,4 +31,9 @@ module.exports = (document) => {
 	});
 
 	return(events);
+};
+
+module.exports = {
+	getAllEvents,
+	getEventDetails
 }

@@ -1,4 +1,8 @@
-module.exports = (document) => {
+const getEventDetails = () => {
+	return {};
+};
+
+const getAllEvents = (document) => {
 	let eventThumbnails = document.querySelectorAll('.events__event-thumbnail');
 	// The first events will start this month
 	const today = new Date();
@@ -24,4 +28,9 @@ module.exports = (document) => {
 		};
 	});
 	return eventThumbnails;
+}
+
+module.exports = {
+	getAllEvents,
+	getEventDetails
 }

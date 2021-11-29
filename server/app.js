@@ -17,6 +17,7 @@ const heaven = require('./venues/heaven');
 const xoyo = require('./venues/xoyo');
 const bgwmc = require('./venues/bgwmc');
 const scrapeVenues = require('../public/js/utils/scrape-venues');
+const updateEventDetails = require('../public/js/utils/update-event-details');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
@@ -60,9 +61,14 @@ app.get('/get-events', cors(), async (req, res) => {
 	}
 });
 
-app.get('/scrape-events', cors(), async (req, res) => {
+app.get('/scrape-venues', cors(), async (req, res) => {
 	const events = await scrapeVenues();
 	res.send(events);
+});
+
+app.get('/update-event-details', cors(), async (req, res) => {
+	await updateEventDetails();
+	res.send([]);
 });
 
 app.get('/glory', cors(), async (req, res) => {
@@ -70,7 +76,7 @@ app.get('/glory', cors(), async (req, res) => {
 		const pageHTMLAsText = await fetch(`${process.env.GLORY_URL}`)
 			.then((response) => response.text());
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = glory(document);
+		const response = glory.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
@@ -84,7 +90,7 @@ app.get('/rvt', cors(), async (req, res) => {
 			.then((response) => response.text());
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = rvt(document);
+		const response = rvt.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
@@ -98,7 +104,7 @@ app.get('/dalston-superstore', cors(), async (req, res) => {
 			.then((response) => response.text());
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = dalstonSuperstore(document);
+		const response = dalstonSuperstore.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
@@ -112,7 +118,7 @@ app.get('/fire', cors(), async (req, res) => {
 			.then((response) => response.text());
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = fire(document);
+		const response = fire.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
@@ -122,12 +128,11 @@ app.get('/fire', cors(), async (req, res) => {
 
 app.get('/lightbox', cors(), async (req, res) => {
 	try {
-		console.log(`${process.env.LIGHTBOX_URL}`);
 		const pageHTMLAsText = await fetch(`${process.env.LIGHTBOX_URL}`)
 			.then((response) => response.text());
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = lightbox(document);
+		const response = lightbox.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
@@ -141,7 +146,7 @@ app.get('/two-brewers', cors(), async (req, res) => {
 			.then((response) => response.text());
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = twoBrewers(document);
+		const response = twoBrewers.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
@@ -155,7 +160,7 @@ app.get('/heaven', cors(), async (req, res) => {
 			.then((response) => response.text());
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = heaven(document);
+		const response = heaven.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
@@ -169,7 +174,7 @@ app.get('/xoyo', cors(), async (req, res) => {
 			.then((response) => response.text());
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = xoyo(document);
+		const response = xoyo.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
@@ -183,7 +188,7 @@ app.get('/bgwmc', cors(), async (req, res) => {
 			.then((response) => response.text());
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = bgwmc(document);
+		const response = bgwmc.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);
