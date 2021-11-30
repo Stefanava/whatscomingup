@@ -1,6 +1,10 @@
-
-const getEventDetails = () => {
-	return {};
+// date, title, image_url, time, cost, description, venue_id, link
+const getEventDetails = (document) => {
+	let entryTitle = document.querySelector('.entry-header > p');
+	const description = entryTitle.innerHTML;
+	return {
+		description
+	};
 };
 
 const getAllEvents = (document) => {
@@ -19,7 +23,6 @@ const getAllEvents = (document) => {
 		const link = box.querySelector('a').getAttribute('href');
 		const image_url = box.querySelector('img').getAttribute('src');
 
-		// date, title, image_url, time, cost, description, venue_id, link
 		return {
 			date: new Date(dateString),
 			image_url,

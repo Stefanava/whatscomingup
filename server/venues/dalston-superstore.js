@@ -1,5 +1,13 @@
-const getEventDetails = () => {
-	return {};
+const getEventDetails = (document) => {
+	const time_from = document.querySelector('.single-event__time__from');
+	const time_to = document.querySelector('.single-event__time__to');
+	const descriptions = document.querySelector('.tribe-events-list-event-description').childNodes;
+	let descString = '';
+	Array.from(descriptions).forEach(node => descString += node.innerHTML || '');
+	return {
+		time: `${time_from} - ${time_to}`,
+		description: descString
+	};
 };
 
 const getAllEvents = (document) => {

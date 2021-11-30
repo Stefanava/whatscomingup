@@ -15,7 +15,7 @@ const getAllEvents = (document) => {
 		const time = eventInfo.querySelector('.event-time').innerHTML;
 		const dayString = eventInfo.querySelector('.day').innerHTML;
 		const monthString = eventInfo.querySelector('.month').innerHTML;
-		let month = months.indexOf(monthString);
+		let month = months.indexOf(monthString) + 1;
 
 		if(month.toString().length === 1) month = `0${month}`;
 		const dateString = `${month}-${dayString}-${new Date().getFullYear()}`;		
@@ -24,9 +24,9 @@ const getAllEvents = (document) => {
 		return {
 			date: new Date(dateString),
 			image_url: imageUrl,
-			link: link,
+			link,
 			title: eventInfo.querySelector('.event-title').innerHTML,
-			time: time,
+			time
 		};
 	});
 

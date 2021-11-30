@@ -1,5 +1,7 @@
 const getEventDetails = (document) => {
-	return {};
+	return {
+		description: ''
+	};
 };
 
 const getAllEvents = (document) => {
@@ -18,8 +20,7 @@ const getAllEvents = (document) => {
 			image_url,
 			link,
 			title,
-			time,
-			// description: eventHolder.querySelector('.desc_row').innerHTML
+			time
 		};
 	});
 

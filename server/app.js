@@ -62,8 +62,21 @@ app.get('/get-events', cors(), async (req, res) => {
 });
 
 app.get('/scrape-venues', cors(), async (req, res) => {
-	const events = await scrapeVenues();
-	res.send(events);
+	try {
+		const connection = mysql.createConnection(process.env.JAWSDB_URL);
+		connection.connect();
+		connection.query(`TRUNCATE TABLE events`, async function(err, rows, fields) {
+			if (err) throw err;
+			console.log("Successfully deleted events from events table");
+			await scrapeVenues();
+			await updateEventDetails();
+			res.send([])
+		});
+		connection.end();
+	} catch(err) {
+		console.log(err);
+		res.send([]);
+	}
 });
 
 app.get('/update-event-details', cors(), async (req, res) => {

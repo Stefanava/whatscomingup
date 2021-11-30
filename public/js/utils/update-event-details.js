@@ -13,6 +13,7 @@ const xoyo = require('../../../server/venues/xoyo');
 const bgwmc = require('../../../server/venues/bgwmc');
 
 module.exports = async () => {
+	console.log("Start Updating event details")
 	const events = await getEvents();
 	const queries = [];
 	for(const event of events) {
@@ -96,21 +97,22 @@ module.exports = async () => {
 			const descriptionQuery = description ? `, description = '${description.replace(/'/g, "")}'` : '';
 			queries.push(`UPDATE events SET ${dateQuery} ${titleQuery} ${imageUrlQuery} ${timeQuery} ${costQuery} ${descriptionQuery} WHERE link = '${link}'`);
 		}
+
 	}
 
 	try {
 		const connection = mysql.createConnection(process.env.JAWSDB_URL);
 		connection.connect();
 		
+		console.log(`Updating ${queries.length} events into DB`);
+		
 		queries.forEach((query, index) => {
-			console.log(query);
 			connection.query(query, function(err, rows, fields) {
 				if (err) throw err;
 				console.log(`Successfully updated event ${index+1}/${queries.length} into DB`);
 				return rows;
 			});
 		});
-		console.log(`Successfully updated ${queries.length} events into DB`);
 		connection.end();
 	} catch (err) {
 		throw err;

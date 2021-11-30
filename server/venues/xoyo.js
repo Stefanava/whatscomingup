@@ -1,5 +1,7 @@
 const getEventDetails = (document) => {
-	return {};
+	return {
+		time: document.querySelector('.top-info-cont').childNodes[3].childNodes[1].wholeText.trim()
+	};
 };
 
 const getAllEvents = (document) => {

@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const mysql = require('mysql');
 const getVenues = require('./get-venues');
+const moment = require('moment');
 
 module.exports = async () => {
 	console.log("Start scraping venues");
@@ -32,8 +33,8 @@ module.exports = async () => {
 					link
 				} = event;
 				// This ensures we only get upcoming events
-				if(new Date().getTime() <= new Date(date).getTime()) {
-					query += `('${date || ''}', '${title ? title.replace(/'/g, "") : ''}', '${image_url || ''}', '${time || ''}', '${cost || ''}', '${description ? description.replace(/'/g, "") : ''}', '${id}', '${link}'), `;
+				if(moment(new Date(date)).isAfter(moment(new Date), 'day')) {
+					query += `("${date || ''}", "${title ? title.replace(/'/g, "") : ''}", "${image_url || ''}", "${time || ''}", "${cost || ''}", "${description ? description.replace(/'/g, "") : ''}", "${id}", "${link}"), `;
 				}
 			});
 			query = query.substring(0, query.length - 2);
@@ -44,21 +45,18 @@ module.exports = async () => {
 		}
 	};
 	try {
-		connection.query(`TRUNCATE TABLE events`, function(err, rows, fields) {
-			if (err) throw err;
-			console.log("Successfully deleted events from events table");
-			return rows;
-		});
 		queries.forEach((query, index ) => {
-			console.log(`Executing insert query ${index}`);
-			console.log(query);
+			console.log(`Executing insert queries for ${venues[index].name}`);
 			connection.query(query, function(err, rows, fields) {
-				if (err) throw err;
-				console.log("Successfully inserted events into DB");
+				if (err) {
+					throw err;
+				}
 				return rows;
 			});
 		});
 		connection.end();
+		
+		console.log("Successfully inserted events into DB");
 	} catch (err) {
 		throw err;
 	}

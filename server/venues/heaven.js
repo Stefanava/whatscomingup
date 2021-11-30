@@ -13,14 +13,14 @@ const getAllEvents = (document) => {
 		const eventDetails = card.querySelector('.event-details');
 		const date = eventDetails.querySelector('.datetime').getAttribute('content');
 		let title = eventDetails.querySelector('.title').innerHTML;
-		const support = eventDetails.querySelector('.support').innerHTML;
+		const support = eventDetails.querySelector('.support').innerHTML.includes("spacer") ? '' : eventDetails.querySelector('.support').innerHTML;
 		title = `${title} ${support}`;
 
 		// date, title, image_url, time, cost, description, venue_id, link
 		return {
 			date: new Date(date),
 			image_url: imageAddress,
-			title: title,
+			title,
 			link,
 			time: new Date(date).toLocaleTimeString(),
 		};
