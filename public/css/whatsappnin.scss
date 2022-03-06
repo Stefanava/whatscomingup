@@ -14,6 +14,13 @@
         grid-auto-flow: dense;
     }
 
+    .event-container {
+        > h2 {
+            padding-top: 10px;
+            margin-top: 0px;
+        }
+    }
+
     .event-container:nth-child(odd) {
         background: #CCC
     }

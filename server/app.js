@@ -16,6 +16,7 @@ const twoBrewers = require('./venues/two-brewers');
 const heaven = require('./venues/heaven');
 const xoyo = require('./venues/xoyo');
 const bgwmc = require('./venues/bgwmc');
+const eagle = require('./venues/eagle');
 const scrapeVenues = require('../public/js/utils/scrape-venues');
 const updateEventDetails = require('../public/js/utils/update-event-details');
 
@@ -50,8 +51,10 @@ app.get('/get-events', cors(), async (req, res) => {
 	try {
 		const connection = mysql.createConnection(process.env.JAWSDB_URL);
 		connection.connect();
+		console.log('Get all events');
 		connection.query(`SELECT * from events`, function(err, rows, fields) {
 			if (err) throw err;
+			console.log('Successfully retrieved all events');
 			res.json(rows);
 		});
 		connection.end();
@@ -69,7 +72,6 @@ app.get('/scrape-venues', cors(), async (req, res) => {
 			if (err) throw err;
 			console.log("Successfully deleted events from events table");
 			await scrapeVenues();
-			await updateEventDetails();
 			res.send([])
 		});
 		connection.end();
@@ -202,6 +204,20 @@ app.get('/bgwmc', cors(), async (req, res) => {
 
 		const { document } = new JSDOM(pageHTMLAsText).window;
 		const response = bgwmc.getAllEvents(document);
+		res.send(response);
+	} catch(err) {
+		console.log(err);
+		res.send([]);
+	}
+});
+
+app.get('/eagle', cors(), async (req, res) => {
+	try {
+		const pageHTMLAsText = await fetch(`${process.env.EAGLE_URL}`)
+			.then((response) => response.text());
+
+		const { document } = new JSDOM(pageHTMLAsText).window;
+		const response = eagle.getAllEvents(document);
 		res.send(response);
 	} catch(err) {
 		console.log(err);

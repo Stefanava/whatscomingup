@@ -4,8 +4,10 @@ const getEventDetails = (document) => {
 	const descriptions = document.querySelector('.tribe-events-list-event-description').childNodes;
 	let descString = '';
 	Array.from(descriptions).forEach(node => descString += node.innerHTML || '');
+
+	console.log(`${time_from.innerHTML} - ${time_to.innerHTML}`);
 	return {
-		time: `${time_from} - ${time_to}`,
+		time: `${time_from.innerHTML} - ${time_to.innerHTML}`,
 		description: descString
 	};
 };
@@ -18,7 +20,6 @@ const getAllEvents = (document) => {
 	let year = today.getFullYear();
 	eventThumbnails = Array.from(eventThumbnails).map((event, index) => {
 		const aNode = event.querySelector('a');
-		const image = `<a target="_blank" href=${aNode.getAttribute("href")}><img src="${aNode.style['background-image'].substring(4)}"></img><a/>`;
 		const day = event.querySelector('.events__event-thumbnail__date').innerHTML;
 		if (day < Array.from(eventThumbnails)[index - 1]) {
 			month += 1;

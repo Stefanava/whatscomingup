@@ -49,6 +49,7 @@ module.exports = async () => {
 			console.log(`Executing insert queries for ${venues[index].name}`);
 			connection.query(query, function(err, rows, fields) {
 				if (err) {
+					console.log(`Error executing query ${query}`);
 					throw err;
 				}
 				return rows;

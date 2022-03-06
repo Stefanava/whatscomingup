@@ -18,7 +18,7 @@ const getAllEvents = (document) => {
 		let month = months.indexOf(monthString) + 1;
 
 		if(month.toString().length === 1) month = `0${month}`;
-		const dateString = `${month}-${dayString}-${new Date().getFullYear()}`;		
+		const dateString = `${month}-${dayString}-${new Date().getFullYear()}`;
 
 		// date, title, image_url, time, cost, description, venue_id, link
 		return {

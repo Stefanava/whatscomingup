@@ -11,91 +11,103 @@ const twoBrewers = require('../../../server/venues/two-brewers');
 const heaven = require('../../../server/venues/heaven');
 const xoyo = require('../../../server/venues/xoyo');
 const bgwmc = require('../../../server/venues/bgwmc');
+const eagle = require('../../../server/venues/eagle');
 
 module.exports = async () => {
-	console.log("Start Updating event details")
+	console.log("Start Updating event details");
 	const events = await getEvents();
 	const queries = [];
 	for(const event of events) {
 		if(event.link.length) {
 			console.log(`Scraping ${event.link}`)
-			const pageHTMLAsText = await fetch(event.link)
-				.then(response => response.text());
-			const { document } = new JSDOM(pageHTMLAsText).window;
-			let detailedEvent;
-			// Dynamic paths for require would be a pretty nifty way of removing this switch statement
-			switch(event.venue_id) {
-				case 1:
-					detailedEvent = {
-						...event,
-						...glory.getEventDetails(document)
-					};
-					break;
-				case 2:
-					detailedEvent = {
-						...event,
-						...rvt.getEventDetails(document)
-					};
-					break;
-				case 3:
-					detailedEvent = {
-						...event,
-						...dalstonSuperstore.getEventDetails(document)
-					};
-					break;
-				case 4:
-					detailedEvent = {
-						...event,
-						...fire.getEventDetails(document)
-					};
-					break;
-				case 5:
-					detailedEvent = {
-						...event,
-						...lightbox.getEventDetails(document)
-					};
-					break;
-				case 6:
-					detailedEvent = {
-						...event,
-						...twoBrewers.getEventDetails(document)
-					};
-					break;
-				case 7:
-					detailedEvent = {
-						...event,
-						...heaven.getEventDetails(document)
-					};
-					break;
-				case 8:
-					detailedEvent = {
-						...event,
-						...xoyo.getEventDetails(document)
-					};
-					break;
-				case 9:
-					detailedEvent = {
-						...event,
-						...bgwmc.getEventDetails(document)
-					};
-					break;
+			try {
+				const pageHTMLAsText = await fetch(event.link)
+					.then(response => response.text());
+				const { document } = new JSDOM(pageHTMLAsText).window;
+				let detailedEvent;
+				// Dynamic paths for require would be a pretty nifty way of removing this switch statement
+				switch(event.venue_id) {
+					case 1:
+						detailedEvent = {
+							...event,
+							...glory.getEventDetails(document)
+						};
+						break;
+					case 2:
+						detailedEvent = {
+							...event,
+							...rvt.getEventDetails(document)
+						};
+						break;
+					case 3:
+						detailedEvent = {
+							...event,
+							...dalstonSuperstore.getEventDetails(document)
+						};
+						break;
+					case 4:
+						detailedEvent = {
+							...event,
+							...fire.getEventDetails(document)
+						};
+						break;
+					case 5:
+						detailedEvent = {
+							...event,
+							...lightbox.getEventDetails(document)
+						};
+						break;
+					case 6:
+						detailedEvent = {
+							...event,
+							...twoBrewers.getEventDetails(document)
+						};
+						break;
+					case 7:
+						detailedEvent = {
+							...event,
+							...heaven.getEventDetails(document)
+						};
+						break;
+					case 8:
+						detailedEvent = {
+							...event,
+							...xoyo.getEventDetails(document)
+						};
+						break;
+					case 9:
+						detailedEvent = {
+							...event,
+							...bgwmc.getEventDetails(document)
+						};
+						break;
+					case 10:
+						detailedEvent = {
+							...event,
+							...eagle.getEventDetails(document)
+						};
+						break;
+				}
+				const {
+					date,
+					title,
+					image_url,
+					time,
+					cost,
+					description,
+					link
+				} = detailedEvent;
+				const dateQuery = date ? `date = '${date}'` : '';
+				const titleQuery = title ? `, title = '${title.replace(/'/g, "")}'` : '';
+				const imageUrlQuery = image_url ? `, image_url = '${image_url}'` : '';
+				const timeQuery = time ? `, time = '${time}'` : '';
+				const costQuery = cost ? `, cost = '${cost}'` : '';
+				const descriptionQuery = description ? `, description = '${description.replace(/'/g, "")}'` : '';
+				queries.push(`UPDATE events SET ${dateQuery} ${titleQuery} ${imageUrlQuery} ${timeQuery} ${costQuery} ${descriptionQuery} WHERE link = '${link}'`);
+				
+			} catch (err) {
+				console.log(err);
 			}
-			const {
-				date,
-				title,
-				image_url,
-				time,
-				cost,
-				description,
-				link
-			} = detailedEvent;
-			const dateQuery = date ? `date = '${date}'` : '';
-			const titleQuery = title ? `, title = '${title.replace(/'/g, "")}'` : '';
-			const imageUrlQuery = image_url ? `, image_url = '${image_url}'` : '';
-			const timeQuery = time ? `, time = '${time}'` : '';
-			const costQuery = cost ? `, cost = '${cost}'` : '';
-			const descriptionQuery = description ? `, description = '${description.replace(/'/g, "")}'` : '';
-			queries.push(`UPDATE events SET ${dateQuery} ${titleQuery} ${imageUrlQuery} ${timeQuery} ${costQuery} ${descriptionQuery} WHERE link = '${link}'`);
 		}
 
 	}
