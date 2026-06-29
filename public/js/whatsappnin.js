@@ -28,7 +28,7 @@ const run = async () => {
 
         const venues = allVenues.map(venue => {
             return {
-                events: allEvents.filter(({ venue_id }) => venue_id === venue.id),
+                events: allEvents.filter(({ venue: eventVenue }) => eventVenue === venue.slug),
                 ...venue
             };
         });

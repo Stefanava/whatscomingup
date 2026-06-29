@@ -1,22 +1,11 @@
-require('@babel/polyfill');
+require('dotenv').config();
 const express = require('express')
 const app = express();
 const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
-require('dotenv').config();
 const cors = require('cors')
-const mysql = require('mysql');
+const pool = require('../public/js/utils/db');
 const { JSDOM } = require('jsdom');
-const glory = require('./venues/glory');
-const rvt = require('./venues/rvt');
-const dalstonSuperstore = require('./venues/dalston-superstore');
-const fire = require('./venues/fire');
-const lightbox = require('./venues/lightbox');
-const twoBrewers = require('./venues/two-brewers');
-const heaven = require('./venues/heaven');
-const xoyo = require('./venues/xoyo');
-const bgwmc = require('./venues/bgwmc');
-const eagle = require('./venues/eagle');
+const scrapers = require('./venues');
 const scrapeVenues = require('../public/js/utils/scrape-venues');
 const updateEventDetails = require('../public/js/utils/update-event-details');
 
@@ -32,16 +21,11 @@ app.get('/__gtg', (req, res) => {
 app.post('/get-venues', cors(), async (req, res) => {
 	try {
 		const { active } = req.body;
-		const connection = mysql.createConnection(process.env.JAWSDB_URL);
-		connection.connect();
-		let query = `SELECT * from venues`;
-		if(active === 'TRUE') query += ` WHERE Active='TRUE'`;
-		connection.query(query, function(err, rows, fields) {
-			if (err) throw err;
-			res.json(rows);
-		});
-		connection.end();
-	} catch(err) {
+		let query = 'SELECT * FROM venues';
+		if (active === 'TRUE') query += " WHERE active = 'TRUE'";
+		const { rows } = await pool.query(query);
+		res.json(rows);
+	} catch (err) {
 		console.log(err);
 		res.send([]);
 	}
@@ -49,16 +33,11 @@ app.post('/get-venues', cors(), async (req, res) => {
 
 app.get('/get-events', cors(), async (req, res) => {
 	try {
-		const connection = mysql.createConnection(process.env.JAWSDB_URL);
-		connection.connect();
 		console.log('Get all events');
-		connection.query(`SELECT * from events`, function(err, rows, fields) {
-			if (err) throw err;
-			console.log('Successfully retrieved all events');
-			res.json(rows);
-		});
-		connection.end();
-	} catch(err) {
+		const { rows } = await pool.query('SELECT * FROM events');
+		console.log('Successfully retrieved all events');
+		res.json(rows);
+	} catch (err) {
 		console.log(err);
 		res.send([]);
 	}
@@ -66,16 +45,11 @@ app.get('/get-events', cors(), async (req, res) => {
 
 app.get('/scrape-venues', cors(), async (req, res) => {
 	try {
-		const connection = mysql.createConnection(process.env.JAWSDB_URL);
-		connection.connect();
-		connection.query(`TRUNCATE TABLE events`, async function(err, rows, fields) {
-			if (err) throw err;
-			console.log("Successfully deleted events from events table");
-			await scrapeVenues();
-			res.send([])
-		});
-		connection.end();
-	} catch(err) {
+		await pool.query('TRUNCATE TABLE events');
+		console.log("Successfully deleted events from events table");
+		await scrapeVenues();
+		res.send([]);
+	} catch (err) {
 		console.log(err);
 		res.send([]);
 	}
@@ -86,143 +60,26 @@ app.get('/update-event-details', cors(), async (req, res) => {
 	res.send([]);
 });
 
-app.get('/glory', cors(), async (req, res) => {
+async function getVenueUrl(slug) {
+	const { rows } = await pool.query('SELECT url FROM venues WHERE slug = $1', [slug]);
+	return rows[0]?.url;
+}
+
+async function scrapeVenueRoute(slug, scraper, res) {
 	try {
-		const pageHTMLAsText = await fetch(`${process.env.GLORY_URL}`)
-			.then((response) => response.text());
+		const url = await getVenueUrl(slug);
+		if (!url) throw new Error(`No URL found for venue: ${slug}`);
+		const pageHTMLAsText = await fetch(url).then(r => r.text());
 		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = glory.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
+		res.send(scraper.getAllEvents(document));
+	} catch (err) {
 		console.log(err);
 		res.send([]);
 	}
-});
+}
 
-app.get('/rvt', cors(), async (req, res) => {
-	try {
-		const pageHTMLAsText = await fetch(`${process.env.RVT_URL}`)
-			.then((response) => response.text());
-
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = rvt.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
-		console.log(err);
-		res.send([]);
-	}
-});
-
-app.get('/dalston-superstore', cors(), async (req, res) => {
-	try {
-		const pageHTMLAsText = await fetch(`${process.env.DALSTON_SUPERSTORE_URL}`)
-			.then((response) => response.text());
-
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = dalstonSuperstore.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
-		console.log(err);
-		res.send([]);
-	}
-});
-
-app.get('/fire', cors(), async (req, res) => {
-	try {
-		const pageHTMLAsText = await fetch(`${process.env.FIRE_URL}`)
-			.then((response) => response.text());
-
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = fire.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
-		console.log(err);
-		res.send([]);
-	}
-});
-
-app.get('/lightbox', cors(), async (req, res) => {
-	try {
-		const pageHTMLAsText = await fetch(`${process.env.LIGHTBOX_URL}`)
-			.then((response) => response.text());
-
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = lightbox.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
-		console.log(err);
-		res.send([]);
-	}
-});
-
-app.get('/two-brewers', cors(), async (req, res) => {
-	try {
-		const pageHTMLAsText = await fetch(`${process.env.TWO_BREWERS_URL}`)
-			.then((response) => response.text());
-
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = twoBrewers.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
-		console.log(err);
-		res.send([]);
-	}
-});
-
-app.get('/heaven', cors(), async (req, res) => {
-	try {
-		const pageHTMLAsText = await fetch(`${process.env.HEAVEN_URL}`)
-			.then((response) => response.text());
-
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = heaven.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
-		console.log(err);
-		res.send([]);
-	}
-});
-
-app.get('/xoyo', cors(), async (req, res) => {
-	try {
-		const pageHTMLAsText = await fetch(`${process.env.XOYO_URL}`)
-			.then((response) => response.text());
-
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = xoyo.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
-		console.log(err);
-		res.send([]);
-	}
-});
-
-app.get('/bgwmc', cors(), async (req, res) => {
-	try {
-		const pageHTMLAsText = await fetch(`${process.env.BGWMC_URL}`)
-			.then((response) => response.text());
-
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = bgwmc.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
-		console.log(err);
-		res.send([]);
-	}
-});
-
-app.get('/eagle', cors(), async (req, res) => {
-	try {
-		const pageHTMLAsText = await fetch(`${process.env.EAGLE_URL}`)
-			.then((response) => response.text());
-
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		const response = eagle.getAllEvents(document);
-		res.send(response);
-	} catch(err) {
-		console.log(err);
-		res.send([]);
-	}
+Object.entries(scrapers).forEach(([slug, scraper]) => {
+	app.get(`/${slug}`, cors(), (req, res) => scrapeVenueRoute(slug, scraper, res));
 });
 
 module.exports = app;

@@ -1,93 +1,21 @@
-const mysql = require('mysql');
-const fetch = require('node-fetch');
+const pool = require('./db');
 const getEvents = require('./get-events');
 const { JSDOM } = require('jsdom');
-const glory = require('../../../server/venues/glory');
-const rvt = require('../../../server/venues/rvt');
-const dalstonSuperstore = require('../../../server/venues/dalston-superstore');
-const fire = require('../../../server/venues/fire');
-const lightbox = require('../../../server/venues/lightbox');
-const twoBrewers = require('../../../server/venues/two-brewers');
-const heaven = require('../../../server/venues/heaven');
-const xoyo = require('../../../server/venues/xoyo');
-const bgwmc = require('../../../server/venues/bgwmc');
-const eagle = require('../../../server/venues/eagle');
+const scrapers = require('../../../server/venues');
 
 module.exports = async () => {
 	console.log("Start Updating event details");
 	const events = await getEvents();
 	const queries = [];
-	for(const event of events) {
-		if(event.link.length) {
+	for (const event of events) {
+		if (event.link.length) {
 			console.log(`Scraping ${event.link}`)
 			try {
 				const pageHTMLAsText = await fetch(event.link)
 					.then(response => response.text());
 				const { document } = new JSDOM(pageHTMLAsText).window;
-				let detailedEvent;
-				// Dynamic paths for require would be a pretty nifty way of removing this switch statement
-				switch(event.venue_id) {
-					case 1:
-						detailedEvent = {
-							...event,
-							...glory.getEventDetails(document)
-						};
-						break;
-					case 2:
-						detailedEvent = {
-							...event,
-							...rvt.getEventDetails(document)
-						};
-						break;
-					case 3:
-						detailedEvent = {
-							...event,
-							...dalstonSuperstore.getEventDetails(document)
-						};
-						break;
-					case 4:
-						detailedEvent = {
-							...event,
-							...fire.getEventDetails(document)
-						};
-						break;
-					case 5:
-						detailedEvent = {
-							...event,
-							...lightbox.getEventDetails(document)
-						};
-						break;
-					case 6:
-						detailedEvent = {
-							...event,
-							...twoBrewers.getEventDetails(document)
-						};
-						break;
-					case 7:
-						detailedEvent = {
-							...event,
-							...heaven.getEventDetails(document)
-						};
-						break;
-					case 8:
-						detailedEvent = {
-							...event,
-							...xoyo.getEventDetails(document)
-						};
-						break;
-					case 9:
-						detailedEvent = {
-							...event,
-							...bgwmc.getEventDetails(document)
-						};
-						break;
-					case 10:
-						detailedEvent = {
-							...event,
-							...eagle.getEventDetails(document)
-						};
-						break;
-				}
+				const scraper = scrapers[event.venue];
+				const detailedEvent = scraper ? { ...event, ...scraper.getEventDetails(document) } : event;
 				const {
 					date,
 					title,
@@ -104,7 +32,7 @@ module.exports = async () => {
 				const costQuery = cost ? `, cost = '${cost}'` : '';
 				const descriptionQuery = description ? `, description = '${description.replace(/'/g, "")}'` : '';
 				queries.push(`UPDATE events SET ${dateQuery} ${titleQuery} ${imageUrlQuery} ${timeQuery} ${costQuery} ${descriptionQuery} WHERE link = '${link}'`);
-				
+
 			} catch (err) {
 				console.log(err);
 			}
@@ -113,19 +41,10 @@ module.exports = async () => {
 	}
 
 	try {
-		const connection = mysql.createConnection(process.env.JAWSDB_URL);
-		connection.connect();
-		
 		console.log(`Updating ${queries.length} events into DB`);
-		
-		queries.forEach((query, index) => {
-			connection.query(query, function(err, rows, fields) {
-				if (err) throw err;
-				console.log(`Successfully updated event ${index+1}/${queries.length} into DB`);
-				return rows;
-			});
-		});
-		connection.end();
+		for (const query of queries) {
+			await pool.query(query);
+		}
 	} catch (err) {
 		throw err;
 	}

@@ -1,27 +1,31 @@
-const fetch = require('node-fetch');
-const mysql = require('mysql');
+const { JSDOM } = require('jsdom');
 const getVenues = require('./get-venues');
 const moment = require('moment');
+const pool = require('./db');
+const scrapers = require('../../../server/venues');
 
-module.exports = async () => {
+const scrapeVenues = async () => {
 	console.log("Start scraping venues");
 	const venues = await getVenues({});
-	const queries = [];
-	const connection = mysql.createConnection(process.env.JAWSDB_URL);
-	connection.connect();
 	for (const venue of venues) {
 		try {
-			const { id, slug } = venue;
-			const events = await fetch(`${process.env.APP_BASE_URL}/${slug}`, {
-				method: 'GET',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				}
-			}).then((response) => response.json());
+			const { slug, name, url } = venue;
+			const scraper = scrapers[slug];
+			if (!scraper) {
+				console.log(`No scraper found for ${slug}, skipping`);
+				continue;
+			}
+			if (!url) {
+				console.log(`No URL set for ${name}, skipping`);
+				continue;
+			}
+
+			const pageHTMLAsText = await fetch(url).then(r => r.text());
+			const { document } = new JSDOM(pageHTMLAsText).window;
+			const events = scraper.getAllEvents(document);
 			console.log(`Found ${events.length} events at ${slug}`);
 
-			let query = `INSERT INTO events (date, title, image_url, time, cost, description, venue_id, link) VALUES `;
+			const valueParts = [];
 			events.forEach(event => {
 				const {
 					date,
@@ -32,33 +36,22 @@ module.exports = async () => {
 					description,
 					link
 				} = event;
-				// This ensures we only get upcoming events
-				if(moment(new Date(date)).isAfter(moment(new Date), 'day')) {
-					query += `("${date || ''}", "${title ? title.replace(/'/g, "") : ''}", "${image_url || ''}", "${time || ''}", "${cost || ''}", "${description ? description.replace(/'/g, "") : ''}", "${id}", "${link}"), `;
+				if (moment(new Date(date)).isAfter(moment(new Date), 'day')) {
+					valueParts.push(`('${date ? moment(new Date(date)).toISOString() : ''}', '${title ? title.replace(/'/g, "") : ''}', '${image_url || ''}', '${time || ''}', ${cost ? `'${cost}'` : 'NULL'}, '${description ? description.replace(/'/g, "") : ''}', '${link}', '${slug}')`);
 				}
 			});
-			query = query.substring(0, query.length - 2);
-			queries.push(query);
-		} catch(err) {
-			console.log(err);
-			throw err;
+
+			if (valueParts.length) {
+				console.log(`Executing insert queries for ${name}`);
+				await pool.query(`INSERT INTO events (date, title, image_url, time, cost, description, link, venue) VALUES ${valueParts.join(', ')}`);
+			}
+		} catch (err) {
+			console.log(`Error scraping ${venue.slug}:`, err.message);
 		}
-	};
-	try {
-		queries.forEach((query, index ) => {
-			console.log(`Executing insert queries for ${venues[index].name}`);
-			connection.query(query, function(err, rows, fields) {
-				if (err) {
-					console.log(`Error executing query ${query}`);
-					throw err;
-				}
-				return rows;
-			});
-		});
-		connection.end();
-		
-		console.log("Successfully inserted events into DB");
-	} catch (err) {
-		throw err;
 	}
+	console.log("Successfully inserted events into DB");
 };
+
+module.exports = scrapeVenues;
+
+scrapeVenues();

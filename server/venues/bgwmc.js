@@ -14,7 +14,7 @@ const getAllEvents = (document) => {
 		const title = eventHolder.getElementsByClassName('style331')[0].innerHTML;
 		const time = eventHolder.getElementsByClassName('style125')[0].querySelectorAll('span')[1];
 
-		// date, title, image_url, time, cost, description, venue_id, link
+		// date, title, image_url, time, cost, description, link, venue
 		return {
 			date: new Date(eventHolder.querySelector('.dtstart').querySelector('span').getAttribute('title')),
 			image_url,

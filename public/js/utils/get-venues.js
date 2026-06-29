@@ -1,7 +1,8 @@
-const fetch = require('node-fetch');
+require('dotenv').config();
 module.exports = async ({
-	active='TRUE',
+	active = 'TRUE',
 }) => {
+
 	let venues = await fetch(`${process.env.APP_BASE_URL}/get-venues`, {
 		method: 'POST',
 		headers: {
