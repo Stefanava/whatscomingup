@@ -1,6 +1,5 @@
-require('dotenv').config();
 module.exports = async () => {
-	let events = await fetch(`${process.env.APP_BASE_URL}/get-events`, {
+	let events = await fetch(`/get-events`, {
 		method: 'GET',
 		headers: {
 			'Accept': 'application/json',

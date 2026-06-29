@@ -1,4 +1,3 @@
-require('dotenv').config();
 require('@babel/polyfill');
 const moment = require('moment');
 const getVenues = require('./utils/get-venues');
