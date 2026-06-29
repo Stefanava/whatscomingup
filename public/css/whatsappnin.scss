@@ -22,6 +22,16 @@ button:active { transform: scale(0.96); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@media (min-width: 641px) {
+  .nin-pills-row {
+    flex-direction: column !important;
+    height: 86px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    align-content: flex-start !important;
+  }
+}
+
 @media (max-width: 640px) {
   .nin-header-inner  { padding: 10px 16px !important; }
   .nin-tagline       { display: none; }
