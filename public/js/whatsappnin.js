@@ -87,8 +87,12 @@ function buildHeader(venues, days) {
         <div style="font-weight:800;font-size:26px;letter-spacing:-0.03em;line-height:1;color:#ffb3d6;">what's nin?</div>
         <div style="font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8f8898;">queer london · nightly</div>
       </div>
-      <div style="display:flex;align-items:center;gap:18px;">
+      <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
         <div style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#8f8898;">${fmtToday()}</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="last-scraped" style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#6f6878;"></span>
+          <button id="btn-scrape" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#8f8898;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:99px;padding:9px 16px;cursor:pointer;">Refresh</button>
+        </div>
         <button id="btn-tonight" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#0c0b0f;background:#ffb3d6;border:none;border-radius:99px;padding:9px 16px;cursor:pointer;">Tonight</button>
       </div>
     </div>
@@ -234,6 +238,41 @@ function attachHandlers() {
 
   header.addEventListener('mouseenter', expand);
   header.addEventListener('mouseleave', collapse);
+
+  const scrapeBtn = document.getElementById('btn-scrape');
+  const lastScrapedEl = document.getElementById('last-scraped');
+
+  const updateLastScraped = () => {
+    const ts = localStorage.getItem('nin_last_scraped');
+    if (ts) {
+      const d = new Date(ts);
+      const str = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+        + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      lastScrapedEl.textContent = 'Last updated ' + str;
+    }
+  };
+
+  updateLastScraped();
+
+  scrapeBtn.addEventListener('click', async () => {
+    scrapeBtn.textContent = 'Updating…';
+    scrapeBtn.disabled = true;
+    scrapeBtn.style.opacity = '0.5';
+    try {
+      await fetch('/scrape-venues');
+      const now = new Date().toISOString();
+      localStorage.setItem('nin_last_scraped', now);
+      updateLastScraped();
+      window.location.reload();
+    } catch (_) {
+      scrapeBtn.textContent = 'Error';
+      setTimeout(() => {
+        scrapeBtn.textContent = 'Refresh';
+        scrapeBtn.disabled = false;
+        scrapeBtn.style.opacity = '1';
+      }, 3000);
+    }
+  });
 
   document.getElementById('btn-tonight').addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
