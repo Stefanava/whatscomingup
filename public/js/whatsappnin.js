@@ -97,7 +97,7 @@ function buildHeader(venues, days) {
       </div>
     </div>
     <div id="header-collapsible" style="overflow:hidden;max-height:0;opacity:0;transition:max-height 0.35s ease,opacity 0.2s ease;">
-      <div class="nin-pills-row" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <div class="nin-pills-row nin-scroll" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:8px;flex-wrap:wrap;">
         <button id="pill-all" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid #f3efe9;background:#f3efe9;color:#0c0b0f;transition:all 0.15s;">All venues</button>
         ${venuePills}
       </div>

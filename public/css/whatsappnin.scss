@@ -27,7 +27,8 @@ button:active { transform: scale(0.96); }
   .nin-tagline       { display: none; }
   .nin-today         { display: none; }
   .nin-last-scraped  { display: none; }
-  .nin-pills-row     { padding-left: 16px !important; padding-right: 16px !important; }
+  .nin-pills-row     { padding-left: 16px !important; padding-right: 16px !important; overflow-x: auto !important; flex-wrap: nowrap !important; }
+  .nin-pills-row button { padding: 5px 10px !important; font-size: 11px !important; flex-shrink: 0; }
   .nin-day-nav       { padding-left: 16px !important; padding-right: 16px !important; }
   .nin-main          { padding-left: 16px !important; padding-right: 16px !important; }
   .day-section       { padding-top: 28px !important; }
