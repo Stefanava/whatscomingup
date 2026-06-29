@@ -21,3 +21,16 @@ button:active { transform: scale(0.96); }
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+@media (max-width: 640px) {
+  .nin-header-inner  { padding: 10px 16px !important; }
+  .nin-tagline       { display: none; }
+  .nin-today         { display: none; }
+  .nin-last-scraped  { display: none; }
+  .nin-pills-row     { padding-left: 16px !important; padding-right: 16px !important; }
+  .nin-day-nav       { padding-left: 16px !important; padding-right: 16px !important; }
+  .nin-main          { padding-left: 16px !important; padding-right: 16px !important; }
+  .day-section       { padding-top: 28px !important; }
+  .day-heading       { font-size: 24px !important; line-height: 1.1 !important; }
+  .event-grid        { grid-template-columns: 1fr !important; gap: 12px !important; }
+}

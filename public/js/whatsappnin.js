@@ -82,26 +82,26 @@ function buildHeader(venues, days) {
 
   return `<header id="site-header" style="position:sticky;top:0;z-index:40;background:rgba(12,11,15,0.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.08);">
     <div style="height:5px;background:#ffb3d6;"></div>
-    <div style="max-width:1280px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+    <div class="nin-header-inner" style="max-width:1280px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
       <div style="display:flex;align-items:baseline;gap:14px;">
         <div style="font-weight:800;font-size:26px;letter-spacing:-0.03em;line-height:1;color:#ffb3d6;">what's nin?</div>
-        <div style="font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8f8898;">queer london · nightly</div>
+        <div class="nin-tagline" style="font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8f8898;">queer london · nightly</div>
       </div>
-      <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
-        <div style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#8f8898;">${fmtToday()}</div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span id="last-scraped" style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#6f6878;"></span>
-          <button id="btn-scrape" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#8f8898;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:99px;padding:9px 16px;cursor:pointer;">Refresh</button>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div class="nin-today" style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#8f8898;">${fmtToday()}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="last-scraped" class="nin-last-scraped" style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#6f6878;"></span>
+          <button id="btn-scrape" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#8f8898;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:99px;padding:8px 14px;cursor:pointer;">Refresh</button>
         </div>
-        <button id="btn-tonight" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#0c0b0f;background:#ffb3d6;border:none;border-radius:99px;padding:9px 16px;cursor:pointer;">Tonight</button>
+        <button id="btn-tonight" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#0c0b0f;background:#ffb3d6;border:none;border-radius:99px;padding:8px 14px;cursor:pointer;">Tonight</button>
       </div>
     </div>
     <div id="header-collapsible" style="overflow:hidden;max-height:0;opacity:0;transition:max-height 0.35s ease,opacity 0.2s ease;">
-      <div style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <div class="nin-pills-row" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:8px;flex-wrap:wrap;">
         <button id="pill-all" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid #f3efe9;background:#f3efe9;color:#0c0b0f;transition:all 0.15s;">All venues</button>
         ${venuePills}
       </div>
-      <nav class="nin-scroll" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:6px;overflow-x:auto;border-top:1px solid rgba(255,255,255,0.05);">
+      <nav class="nin-scroll nin-day-nav" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:6px;overflow-x:auto;border-top:1px solid rgba(255,255,255,0.05);">
         ${dayPills}
       </nav>
     </div>
@@ -140,7 +140,7 @@ function buildSection(day, venueMap) {
 
   return `<section id="${dayId(day.key)}" class="day-section" data-day="${day.key}" style="padding-top:46px;">
     <div style="display:flex;align-items:baseline;gap:16px;padding-bottom:16px;flex-wrap:wrap;">
-      <h2 style="margin:0;font-weight:800;font-size:38px;letter-spacing:-0.03em;line-height:0.95;">${WD_LONG[d.getDay()]} <span style="color:#8f8898;font-weight:600;">${d.getDate()} ${MONTHS[d.getMonth()]}</span></h2>
+      <h2 class="day-heading" style="margin:0;font-weight:800;font-size:38px;letter-spacing:-0.03em;line-height:0.95;">${WD_LONG[d.getDay()]} <span style="color:#8f8898;font-weight:600;">${d.getDate()} ${MONTHS[d.getMonth()]}</span></h2>
       <span class="day-summary" data-day="${day.key}" style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#8f8898;margin-left:auto;">${day.events.length} night${day.events.length !== 1 ? 's' : ''}</span>
     </div>
     <div style="height:3px;border-radius:99px;margin-bottom:26px;background:#ffb3d6;"></div>
@@ -158,7 +158,7 @@ function buildPage(venues, days) {
   venues.forEach(v => { venueMap[v.slug] = v; });
 
   return buildHeader(venues, days) + `
-    <main style="max-width:1280px;margin:0 auto;padding:0 28px 80px;">
+    <main class="nin-main" style="max-width:1280px;margin:0 auto;padding:0 28px 80px;">
       ${days.map(day => buildSection(day, venueMap)).join('')}
       <footer style="margin-top:64px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
         <div style="font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#ffb3d6;">what's nin?</div>
@@ -236,8 +236,12 @@ function attachHandlers() {
     collapsible.style.opacity = '0';
   };
 
-  header.addEventListener('mouseenter', expand);
-  header.addEventListener('mouseleave', collapse);
+  if (window.matchMedia('(hover: hover)').matches) {
+    header.addEventListener('mouseenter', expand);
+    header.addEventListener('mouseleave', collapse);
+  } else {
+    expand();
+  }
 
   const scrapeBtn = document.getElementById('btn-scrape');
   const lastScrapedEl = document.getElementById('last-scraped');
