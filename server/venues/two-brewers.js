@@ -1,39 +1,25 @@
-const getEventDetails = (document) => {
-	return {};
-};
+const getEventDetails = () => ({});
 
 const getAllEvents = (document) => {
-	let events = document.querySelector('.events-inner').querySelectorAll('.event-details');
+	const seen = new Set();
+	const events = [];
 
-	const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+	document.querySelectorAll('a.event-card').forEach(card => {
+		const href = card.getAttribute('href');
+		if (seen.has(href)) return;
+		seen.add(href);
 
-	events = Array.from(events).map(event => {
-		const aNode = event.querySelector('a');
-		const imageUrl = aNode.querySelector('img').getAttribute('src');
-		const link = `${process.env.TWO_BREWERS_URL}${aNode.getAttribute('href')}`;
-		const eventInfo = event.querySelector('article').querySelector('.event-info');
-		const time = eventInfo.querySelector('.event-time').innerHTML;
-		const dayString = eventInfo.querySelector('.day').innerHTML;
-		const monthString = eventInfo.querySelector('.month').innerHTML;
-		let month = months.indexOf(monthString) + 1;
+		const date = new Date(card.getAttribute('data-date'));
+		const title = card.querySelector('.event-title')?.innerHTML?.trim() || '';
+		const time = card.querySelector('.event-time')?.innerHTML?.trim() || '';
+		const link = 'https://www.the2brewers.com' + href;
+		const imageEl = card.parentElement?.querySelector('a.event-image img');
+		const image_url = imageEl?.getAttribute('data-src') || imageEl?.getAttribute('src') || '';
 
-		if(month.toString().length === 1) month = `0${month}`;
-		const dateString = `${month}-${dayString}-${new Date().getFullYear()}`;
-
-		// date, title, image_url, time, cost, description, venue_id, link
-		return {
-			date: new Date(dateString),
-			image_url: imageUrl,
-			link,
-			title: eventInfo.querySelector('.event-title').innerHTML,
-			time
-		};
+		events.push({ date, title, time, image_url, link });
 	});
 
-	return(events);
+	return events;
 };
 
-module.exports = {
-	getAllEvents,
-	getEventDetails
-}
+module.exports = { getAllEvents, getEventDetails };

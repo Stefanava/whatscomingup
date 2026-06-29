@@ -18,16 +18,21 @@ const scrapeVenues = async () => {
 			results.push(result);
 			continue;
 		}
-		if (!url) {
+		if (!scraper.fetchEvents && !url) {
 			result.error = 'No URL set';
 			results.push(result);
 			continue;
 		}
 
 		try {
-			const pageHTMLAsText = await fetch(url).then(r => r.text());
-			const { document } = new JSDOM(pageHTMLAsText).window;
-			const events = scraper.getAllEvents(document);
+			let events;
+			if (scraper.fetchEvents) {
+				events = await scraper.fetchEvents();
+			} else {
+				const pageHTMLAsText = await fetch(url).then(r => r.text());
+				const { document } = new JSDOM(pageHTMLAsText).window;
+				events = scraper.getAllEvents(document);
+			}
 
 			const valueParts = [];
 			events.forEach(event => {

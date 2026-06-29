@@ -1,30 +1,7 @@
-const getEventDetails = (document) => {
-	return {
-		time: document.querySelector('.top-info-cont').childNodes[3].childNodes[1].wholeText.trim()
-	};
+const getEventDetails = () => ({});
+
+const getAllEvents = () => {
+	throw new Error('Lightbox uses a Skiddle JavaScript widget — events cannot be scraped via HTML');
 };
 
-const getAllEvents = (document) => {
-	let eventHolders = document.querySelector('#content').querySelectorAll('.event-holder');
-
-	eventHolders = Array.from(eventHolders).map(eventHolder => {
-		const imageLink = eventHolder.querySelector('.photo').querySelector('.value-title').getAttribute('title');
-		const link = `${process.env.LIGHTBOX_URL}${eventHolder.querySelector('.url').getAttribute('href').replace('/whats-on/London/Lightbox/', '')}`;
-
-		// date, title, image_url, time, cost, description, venue_id, link
-		return {
-			date: new Date(eventHolder.querySelector('.dtstart').querySelector('span').getAttribute('title')),
-			image_url: imageLink,
-			link,
-			title: eventHolder.querySelector('.summary').querySelector('a').innerHTML,
-			description: eventHolder.querySelector('.desc_row').innerHTML
-		};
-	});
-
-	return eventHolders;
-}
-
-module.exports = {
-	getAllEvents,
-	getEventDetails
-}
+module.exports = { getAllEvents, getEventDetails };

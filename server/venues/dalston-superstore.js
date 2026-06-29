@@ -31,7 +31,7 @@ const getAllEvents = (document) => {
 		// date, title, image_url, time, cost, description, venue_id, link
 		return {
 			date: new Date(year, month - 1, day),
-			image_url: aNode.style['background-image'].substring(4),
+			image_url: aNode.style['background-image'].slice(4, -1),
 			link: aNode.getAttribute("href"),
 			title: event.querySelector('.event-thumbnail__title').innerHTML
 		};

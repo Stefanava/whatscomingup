@@ -1,4 +1,5 @@
 module.exports = {
+	'coven': require('./coven'),
 	'divine': require('./divine'),
 	'rvt': require('./rvt'),
 	'dalston-superstore': require('./dalston-superstore'),

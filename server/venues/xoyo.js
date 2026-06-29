@@ -1,30 +1,22 @@
-const getEventDetails = (document) => {
-	return {
-		time: document.querySelector('.top-info-cont').childNodes[3].childNodes[1].wholeText.trim()
-	};
-};
+const getEventDetails = () => ({});
 
 const getAllEvents = (document) => {
-	let eventHolders = document.querySelector('#content').querySelectorAll('.event-holder');
+	const blocks = document.querySelectorAll('.event-block');
+	const now = new Date();
+	const currentYear = now.getFullYear();
 
-	eventHolders = Array.from(eventHolders).map(eventHolder => {
-		const imageLink = eventHolder.querySelector('.photo').querySelector('.value-title').getAttribute('title');
-		const link = eventHolder.querySelector('.url').getAttribute('href').replace('/whats-on/London/XOYO/', '');
+	return Array.from(blocks).map(block => {
+		const link = 'https://www.xoyo.co.uk' + block.querySelector('a').getAttribute('href');
+		const image_url = block.querySelector('.event-image').style.backgroundImage
+			.replace(/url\(["']?(.+?)["']?\)/, '$1');
+		const dateTexts = block.querySelectorAll('.date-block h4');
+		const dateStr = dateTexts[1]?.innerHTML?.trim() || '';
+		const parsedDate = new Date(`${dateStr} ${currentYear}`);
+		const date = parsedDate < now ? new Date(`${dateStr} ${currentYear + 1}`) : parsedDate;
+		const title = block.querySelector('.event-title-holder h2')?.innerHTML?.trim() || '';
 
-		// date, title, image_url, time, cost, description, venue_id, link
-		return {
-			date: new Date(eventHolder.querySelector('.dtstart').querySelector('span').getAttribute('title')),
-			image_url: imageLink,
-			link: `${process.env.XOYO_URL}/${link}`,
-			title: eventHolder.querySelector('.summary').querySelector('a').innerHTML,
-			description: eventHolder.querySelector('.desc_row').innerHTML
-		};
+		return { date, image_url, link, title };
 	});
-
-	return eventHolders;
 };
 
-module.exports = {
-	getAllEvents,
-	getEventDetails
-}
+module.exports = { getAllEvents, getEventDetails };
