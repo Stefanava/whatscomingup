@@ -23,6 +23,7 @@ app.post('/get-venues', cors(), async (req, res) => {
 		const { active } = req.body;
 		let query = 'SELECT * FROM venues';
 		if (active === 'TRUE') query += " WHERE active = 'TRUE'";
+		query += ' ORDER BY name';
 		const { rows } = await pool.query(query);
 		res.json(rows);
 	} catch (err) {

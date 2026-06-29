@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #0c0b0f; }
+  ::selection { background: #ff3d9a; color: #0c0b0f; }
+  .nin-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+  .nin-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
+  .nin-scroll::-webkit-scrollbar-track { background: transparent; }
+  @keyframes ninFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  image-slot { display: block; }
+</style>
+<script src="./image-slot.js"></script>
+</helmet>
+<div style="min-height:100vh; background:#0c0b0f; color:#f3efe9; font-family:'Bricolage Grotesque', system-ui, sans-serif; -webkit-font-smoothing:antialiased; padding-bottom:80px;">
+
+  <header style="position:sticky; top:0; z-index:40; background:rgba(12,11,15,0.86); backdrop-filter:blur(16px); border-bottom:1px solid rgba(255,255,255,0.08);">
+    <div style="height:5px; background:#ffb3d6;"></div>
+    <div style="max-width:1280px; margin:0 auto; padding:16px 28px 0; display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:baseline; gap:14px;">
+        <div style="font-weight:800; font-size:30px; letter-spacing:-0.03em; line-height:1; color:#ffb3d6;">what's nin?</div>
+        <div style="font-family:'Spline Sans Mono', monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#8f8898;">queer london · nightly</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:18px;">
+        <div style="font-family:'Spline Sans Mono', monospace; font-size:12px; color:#8f8898;">{{ todayLabel }}</div>
+        <button onClick="{{ scrollTop }}" style="font-family:'Spline Sans Mono', monospace; font-size:12px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#0c0b0f; background:#ffb3d6; border:none; border-radius:99px; padding:9px 16px; cursor:pointer;">Tonight</button>
+      </div>
+    </div>
+
+    <div class="nin-scroll" style="max-width:1280px; margin:0 auto; padding:14px 28px; display:flex; gap:8px; overflow-x:auto;">
+      <button onClick="{{ clearFilter }}" style-active="transform:scale(0.96)" style="flex:0 0 auto; font-family:'Spline Sans Mono', monospace; font-size:12px; font-weight:600; letter-spacing:0.02em; padding:7px 14px; border-radius:99px; cursor:pointer; border:1px solid {{ allBorder }}; background:{{ allBg }}; color:{{ allColor }};">All venues</button>
+      <sc-for list="{{ venues }}" as="v" hint-placeholder-count="12">
+        <button onClick="{{ v.onClick }}" style-active="transform:scale(0.96)" style="flex:0 0 auto; display:flex; align-items:center; gap:8px; font-family:'Spline Sans Mono', monospace; font-size:12px; font-weight:600; letter-spacing:0.01em; padding:7px 14px; border-radius:99px; cursor:pointer; white-space:nowrap; border:1px solid {{ v.border }}; background:{{ v.bg }}; color:{{ v.textColor }};">
+          <span style="width:9px; height:9px; border-radius:99px; background:{{ v.color }}; flex:0 0 auto;"></span>{{ v.label }}
+        </button>
+      </sc-for>
+    </div>
+
+    <nav class="nin-scroll" style="max-width:1280px; margin:0 auto; padding:0 28px 14px; display:flex; gap:6px; overflow-x:auto; border-top:1px solid rgba(255,255,255,0.05);">
+      <div style="padding-top:14px;"></div>
+      <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+        <button onClick="{{ d.onClick }}" style="flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:58px; padding:9px 12px; margin-top:14px; border-radius:12px; cursor:pointer; border:1px solid {{ d.navBorder }}; background:{{ d.navBg }}; color:{{ d.navColor }};">
+          <span style="font-family:'Spline Sans Mono', monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; opacity:0.7;">{{ d.weekdayShort }}</span>
+          <span style="font-weight:700; font-size:18px; line-height:1;">{{ d.dayNum }}</span>
+          <span style="font-family:'Spline Sans Mono', monospace; font-size:9px; letter-spacing:0.05em; color:#ff3d9a; min-height:11px;">{{ d.countLabel }}</span>
+        </button>
+      </sc-for>
+    </nav>
+  </header>
+
+  <main style="max-width:1280px; margin:0 auto; padding:0 28px;">
+    <sc-for list="{{ days }}" as="d" hint-placeholder-count="3">
+      <section id="{{ d.id }}" style="padding-top:46px;">
+        <div style="display:flex; align-items:baseline; gap:16px; padding-bottom:16px;">
+          <h2 style="margin:0; font-weight:800; font-size:38px; letter-spacing:-0.03em; line-height:0.95;">{{ d.weekday }} <span style="color:#8f8898; font-weight:600;">{{ d.dateLong }}</span></h2>
+          <span style="font-family:'Spline Sans Mono', monospace; font-size:12px; color:#8f8898; margin-left:auto;">{{ d.summaryLabel }}</span>
+        </div>
+        <div style="height:3px; border-radius:99px; margin-bottom:26px; background:#ffb3d6;"></div>
+
+        <sc-if value="{{ d.hasEvents }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(290px, 1fr)); gap:18px; align-items:start;">
+            <sc-for list="{{ d.events }}" as="e" hint-placeholder-count="3">
+              <article style="animation:ninFade 0.4s ease both; display:flex; flex-direction:column; background:#161420; border:1px solid rgba(255,255,255,0.07); border-left:5px solid {{ e.color }}; border-radius:16px; overflow:hidden;">
+                <sc-if value="{{ e.hasPoster }}" hint-placeholder-val="{{ true }}">
+                  <image-slot id="{{ e.slotId }}" style="width:100%; aspect-ratio:3/4;" shape="rect" placeholder="{{ e.posterHint }}"></image-slot>
+                </sc-if>
+                <div style="padding:18px 18px 20px; display:flex; flex-direction:column; gap:12px; flex:1;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <span style="display:inline-flex; align-items:center; gap:7px; font-family:'Spline Sans Mono', monospace; font-size:11px; font-weight:600; letter-spacing:0.02em; padding:5px 10px; border-radius:99px; background:{{ e.tagBg }}; color:{{ e.color }};"><span style="width:7px; height:7px; border-radius:99px; background:{{ e.color }};"></span>{{ e.venue }}</span>
+                    <span style="font-family:'Spline Sans Mono', monospace; font-size:12px; font-weight:500; color:#cabfd4; white-space:nowrap;">{{ e.time }}</span>
+                  </div>
+                  <h3 style="margin:0; font-weight:700; font-size:21px; line-height:1.12; letter-spacing:-0.02em; text-wrap:pretty;">{{ e.title }}</h3>
+                  <sc-if value="{{ e.blurb }}" hint-placeholder-val="x">
+                    <p style="margin:0; font-size:14px; line-height:1.5; color:#a9a1b3; text-wrap:pretty;">{{ e.blurb }}</p>
+                  </sc-if>
+                  <div style="margin-top:auto; padding-top:8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <span style="font-family:'Spline Sans Mono', monospace; font-size:12px; color:#8f8898;">{{ e.price }}</span>
+                    <a href="#" style="font-family:'Spline Sans Mono', monospace; font-size:12px; font-weight:600; letter-spacing:0.03em; text-transform:uppercase; text-decoration:none; padding:8px 14px; border-radius:99px; color:{{ e.color }}; border:1px solid {{ e.tagBorder }};">Tickets →</a>
+                  </div>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ d.isEmpty }}" hint-placeholder-val="">
+          <div style="padding:40px 24px; border:1px dashed rgba(255,255,255,0.12); border-radius:16px; text-align:center;">
+            <p style="margin:0; font-size:16px; color:#8f8898;">{{ d.emptyMessage }}</p>
+          </div>
+        </sc-if>
+      </section>
+    </sc-for>
+
+    <footer style="margin-top:64px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.09); display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+      <div style="font-weight:800; font-size:20px; letter-spacing:-0.02em; color:#ffb3d6;">what's nin?</div>
+      <div style="font-family:'Spline Sans Mono', monospace; font-size:11px; letter-spacing:0.06em; color:#6f6878; text-align:right;">a love letter to queer london nightlife<br>got a night to list? hello@whatsnin.london</div>
+    </footer>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { filter: null };
+
+  venueDefs() {
+    return [
+      { key: 'bgwmc',   label: 'BGWMC',              venue: 'Bethnal Green WMC',  color: '#ff5252' },
+      { key: 'coven',   label: 'Coven',              venue: 'Coven',              color: '#b06cff' },
+      { key: 'dalston', label: 'Dalston Superstore', venue: 'Dalston Superstore', color: '#1fd3c3' },
+      { key: 'fire',    label: 'Fire',               venue: 'Fire',               color: '#ff7a18' },
+      { key: 'heaven',  label: 'Heaven',             venue: 'Heaven',             color: '#3d8bff' },
+      { key: 'lightbox',label: 'Lightbox',           venue: 'Lightbox',           color: '#ffc233' },
+      { key: 'rvt',     label: 'RVT',                venue: 'RVT',                color: '#3ddc84' },
+      { key: 'divine',  label: 'The Divine',         venue: 'The Divine',         color: '#ff3d9a' },
+      { key: 'eagle',   label: 'The Eagle',          venue: 'The Eagle',          color: '#7b7bff' },
+      { key: 'xoyo',    label: 'XOYO',               venue: 'XOYO',               color: '#19d0ff' },
+      { key: 'brewers', label: 'Two Brewers',        venue: 'Two Brewers',        color: '#f0a23c' },
+      { key: 'swan',    label: 'The White Swan',     venue: 'The White Swan',     color: '#ff6dc4' },
+    ];
+  }
+
+  rawDays() {
+    return [
+      { id: 'd-29', weekday: 'Monday', weekdayShort: 'Mon', dayNum: '29', dateLong: '29 Jun',
+        empty: 'Quiet one tonight. Rest those heels — the week peaks soon.', events: [] },
+      { id: 'd-30', weekday: 'Tuesday', weekdayShort: 'Tue', dayNum: '30', dateLong: '30 Jun', events: [
+        { v: 'divine', title: 'FRINGE — Grace Quigley: On Our Backs', time: '7:00 PM', poster: true,
+          blurb: 'Through cheap glamour and dyke fantasy, Dilly chases love, family and queer futures in a seductive cabaret confession.', price: '£8–£15' },
+        { v: 'divine', title: 'FRINGE — Temi Wilkey: LOVERGIRL (WIP)', time: '9:00 PM', poster: true,
+          blurb: 'Sexy, surreal and gloriously self-indulgent. Temi is back — and this one is for the lovers.', price: '£8–£15' },
+        { v: 'brewers', title: 'Hot Mess Karaoke', time: '5PM – 2AM',
+          blurb: "Grab the mic, lose the plot. South London's messiest singalong runs til close.", price: 'Free entry' },
+      ] },
+      { id: 'd-01', weekday: 'Wednesday', weekdayShort: 'Wed', dayNum: '1', dateLong: '1 Jul', events: [
+        { v: 'coven', title: 'A Night With Cistar Tea', time: '8:00 PM',
+          blurb: 'House, ballroom and a rotating cast of the city\u2019s sharpest performers.', price: '£6 adv' },
+        { v: 'divine', title: 'CABARET — Populence', time: '8:30 PM', poster: true,
+          blurb: 'A riotous variety bill of drag, clown and chaos hosted by the Populence crew.', price: '£10' },
+        { v: 'brewers', title: 'Cabaret with Sandra', time: '9:00 PM',
+          blurb: 'The Brewers\u2019 long-running midweek cabaret. Bingo, banter, big numbers.', price: 'Free entry' },
+      ] },
+      { id: 'd-02', weekday: 'Thursday', weekdayShort: 'Thu', dayNum: '2', dateLong: '2 Jul', events: [
+        { v: 'rvt', title: 'Bar Wotever', time: '7:30 PM',
+          blurb: 'Open-mic and cabaret for every gender and none. All bodies, all welcome.', price: '£5 sugg.' },
+        { v: 'heaven', title: 'Sink The Pink Presents', time: '10:00 PM',
+          blurb: 'Glitter-soaked club night with the dressing-up box wide open.', price: '£12 adv' },
+        { v: 'dalston', title: 'Superstore Thursdays', time: '9PM – 2:30AM',
+          blurb: 'Free-entry club downstairs, kitchen til late, no dress code but make an effort.', price: 'Free' },
+      ] },
+      { id: 'd-03', weekday: 'Friday', weekdayShort: 'Fri', dayNum: '3', dateLong: '3 Jul', events: [
+        { v: 'xoyo', title: 'PXSSY PALACE', time: '11PM – 5AM',
+          blurb: 'Centring QTIBPOC joy on the dancefloor. Door priority as listed.', price: '£18 adv' },
+        { v: 'eagle', title: 'Horse Meat Disco', time: '10PM – 4AM',
+          blurb: 'The Sunday institution\u2019s Friday spin-off. Disco for the people.', price: '£10' },
+        { v: 'swan', title: 'Drag Idol Heat', time: '9:00 PM',
+          blurb: 'East London\u2019s next drag stars fight it out, judged by you.', price: 'Free b/4 10' },
+        { v: 'fire', title: 'Later — Room One', time: '12AM – 7AM',
+          blurb: 'After-hours techno for those who simply will not go home.', price: '£15 adv' },
+      ] },
+      { id: 'd-04', weekday: 'Saturday', weekdayShort: 'Sat', dayNum: '4', dateLong: '4 Jul', events: [
+        { v: 'rvt', title: 'Duckie', time: '9PM – 2AM',
+          blurb: 'The progressive working-class queer Saturday. Always has been.', price: '£10 adv' },
+        { v: 'brewers', title: 'Saturday Showtime', time: '9:30 PM',
+          blurb: 'Two shows, two floors, the full Clapham cabaret machine in motion.', price: '£8' },
+        { v: 'coven', title: 'COVEN: Witching Hour', time: '11PM – 4AM',
+          blurb: 'Heavy low-end, femme and trans-led line-up, no photos on the floor.', price: '£14 adv' },
+        { v: 'lightbox', title: 'Polysexual', time: '10PM – 6AM',
+          blurb: 'Big-room house and trance for a mixed, up-for-it crowd.', price: '£20 adv' },
+      ] },
+    ];
+  }
+
+  setFilter(key) {
+    this.setState(s => ({ filter: s.filter === key ? null : key }));
+  }
+
+  scrollToDay(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 132;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+
+  renderVals() {
+    const filter = this.state.filter;
+    const defs = this.venueDefs();
+    const byKey = {};
+    defs.forEach(d => { byKey[d.key] = d; });
+
+    const venues = defs.map(d => {
+      const active = filter === d.key;
+      return {
+        label: d.label,
+        color: d.color,
+        onClick: () => this.setFilter(d.key),
+        bg: active ? d.color : 'rgba(255,255,255,0.03)',
+        border: active ? d.color : 'rgba(255,255,255,0.1)',
+        textColor: active ? '#0c0b0f' : '#cabfd4',
+      };
+    });
+
+    const allActive = !filter;
+    const allBg = allActive ? '#f3efe9' : 'rgba(255,255,255,0.03)';
+    const allBorder = allActive ? '#f3efe9' : 'rgba(255,255,255,0.1)';
+    const allColor = allActive ? '#0c0b0f' : '#cabfd4';
+
+    const days = this.rawDays().map(day => {
+      const events = day.events
+        .filter(e => !filter || e.v === filter)
+        .map((e, i) => {
+          const def = byKey[e.v];
+          return {
+            slotId: 'poster-' + day.id + '-' + i,
+            venue: def.venue,
+            color: def.color,
+            tagBg: def.color + '22',
+            tagBorder: def.color + '66',
+            posterHint: 'Drop poster',
+            title: e.title,
+            time: e.time,
+            blurb: e.blurb || '',
+            price: e.price,
+            hasPoster: !!e.poster,
+          };
+        });
+      const hasEvents = events.length > 0;
+      const filteredAway = day.events.length > 0 && !hasEvents;
+      const total = day.events.length;
+      return {
+        id: day.id,
+        weekday: day.weekday,
+        weekdayShort: day.weekdayShort,
+        dayNum: day.dayNum,
+        dateLong: day.dateLong,
+        events,
+        hasEvents,
+        isEmpty: !hasEvents,
+        emptyMessage: filteredAway ? 'No ' + (byKey[filter] ? byKey[filter].venue : '') + ' nights this day.' : day.empty,
+        summaryLabel: total === 0 ? 'no listings' : (hasEvents ? events.length + ' night' + (events.length === 1 ? '' : 's') : 'filtered'),
+        countLabel: hasEvents ? String(events.length) : '',
+        onClick: () => this.scrollToDay(day.id),
+        navBg: 'rgba(255,255,255,0.03)',
+        navBorder: 'rgba(255,255,255,0.1)',
+        navColor: '#cabfd4',
+      };
+    });
+
+    return {
+      todayLabel: 'Mon 29 Jun 2026',
+      venues,
+      days,
+      allBg, allBorder, allColor,
+      clearFilter: () => this.setState({ filter: null }),
+      scrollTop: () => window.scrollTo({ top: 0, behavior: 'smooth' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

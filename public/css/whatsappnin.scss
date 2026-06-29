@@ -1,63 +1,23 @@
-.venue-list-item {
-    padding: 0 5px;
-    color: lightgrey;
-    background-color: black;
-    font-size: 15pt;
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: #0c0b0f;
+  color: #f3efe9;
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-#event-grid-container {
+::selection { background: #ff3d9a; color: #0c0b0f; }
 
-    .event-contents {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, 300px);
-        grid-gap: 32px;
-        grid-auto-flow: dense;
-    }
+.nin-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+.nin-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 99px; }
+.nin-scroll::-webkit-scrollbar-track { background: transparent; }
 
-    .event-container {
-        > h2 {
-            padding-top: 10px;
-            margin-top: 0px;
-        }
-    }
+button { font-family: inherit; }
+button:active { transform: scale(0.96); }
 
-    .event-container:nth-child(odd) {
-        background: #CCC
-    }
-
-    .event-container:nth-child(even) {
-        background: #FFF
-    }
-}
-  
-
-.event-grid-item {
-    
-    padding: 10px;
-    .event-title {
-        width: 280px;
-        font-weight: bold;
-        color: black;
-        margin: 0;
-        display: block;
-
-        a {
-            color: black
-        }
-        a:link { text-decoration: none; }
-        a:visited { text-decoration: none; }
-        a:hover { text-decoration: none; }
-        a:active { text-decoration: none; }
-    }
-
-    .event-description {
-        width: 280px;
-        color: black;
-    }
-    
-    .event-image {
-        img {
-            max-width: 250px;
-        }
-    }
+@keyframes ninFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
