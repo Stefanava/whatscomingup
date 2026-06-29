@@ -22,22 +22,12 @@ button:active { transform: scale(0.96); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@media (min-width: 641px) {
-  .nin-pills-row {
-    flex-direction: column !important;
-    height: 86px !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    align-content: flex-start !important;
-  }
-}
-
 @media (max-width: 640px) {
   .nin-header-inner  { padding: 10px 16px !important; }
   .nin-tagline       { display: none; }
   .nin-today         { display: none; }
   .nin-last-scraped  { display: none; }
-  .nin-pills-row     { padding-left: 16px !important; padding-right: 16px !important; overflow-x: auto !important; flex-wrap: nowrap !important; }
+  .nin-pills-row     { padding-left: 16px !important; padding-right: 16px !important; flex-direction: column !important; height: 76px !important; overflow-x: auto !important; overflow-y: hidden !important; align-content: flex-start !important; }
   .nin-pills-row button { padding: 5px 10px !important; font-size: 11px !important; flex-shrink: 0; }
   .nin-day-nav       { padding-left: 16px !important; padding-right: 16px !important; }
   .nin-main          { padding-left: 16px !important; padding-right: 16px !important; }
