@@ -1,9 +1,8 @@
-require('dotenv').config();
 module.exports = async ({
 	active = 'TRUE',
 }) => {
 
-	let venues = await fetch(`${process.env.APP_BASE_URL}/get-venues`, {
+	let venues = await fetch(`/get-venues`, {
 		method: 'POST',
 		headers: {
 			'Accept': 'application/json',

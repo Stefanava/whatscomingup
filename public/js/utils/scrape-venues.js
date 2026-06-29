@@ -1,12 +1,11 @@
 const { JSDOM } = require('jsdom');
-const getVenues = require('./get-venues');
 const moment = require('moment');
 const pool = require('./db');
 const scrapers = require('../../../server/venues');
 
 const scrapeVenues = async () => {
 	console.log("Start scraping venues");
-	const venues = await getVenues({});
+	const { rows: venues } = await pool.query("SELECT * FROM venues WHERE active = 'TRUE'");
 	const results = [];
 
 	for (const venue of venues) {
