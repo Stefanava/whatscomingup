@@ -33,8 +33,6 @@ const run = async () => {
             };
         });
 
-        console.log(venues);
-
         // Build the venues object adding the events
         venues.forEach(venue => {
             
@@ -70,7 +68,6 @@ const run = async () => {
             }
         });
     } catch (error) {
-        console.log(error);
     }
 }
 
