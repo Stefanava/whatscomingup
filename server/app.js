@@ -46,12 +46,15 @@ app.get('/get-events', cors(), async (req, res) => {
 app.get('/scrape-venues', cors(), async (req, res) => {
 	try {
 		await pool.query('TRUNCATE TABLE events');
-		console.log("Successfully deleted events from events table");
-		await scrapeVenues();
-		res.send([]);
+		const results = await scrapeVenues();
+		const rows = results.map(({ name, eventsInserted, error }) => {
+			const status = error ? `❌ ${error}` : `✅ ${eventsInserted} event${eventsInserted !== 1 ? 's' : ''}`;
+			return `<tr><td>${name}</td><td>${status}</td></tr>`;
+		}).join('');
+		res.send(`<h1>Scrape complete</h1><table border="1" cellpadding="6"><tr><th>Venue</th><th>Result</th></tr>${rows}</table>`);
 	} catch (err) {
 		console.log(err);
-		res.send([]);
+		res.send(`<h1>Scrape failed</h1><pre>${err.message}</pre>`);
 	}
 });
 
