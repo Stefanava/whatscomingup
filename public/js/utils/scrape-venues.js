@@ -54,6 +54,18 @@ const scrapeVenues = async () => {
 		results.push(result);
 	}
 
+	try {
+		await pool.query(`
+			DELETE FROM events a
+			USING events b
+			WHERE a.ctid > b.ctid
+			  AND a.title = b.title
+			  AND a.date = b.date
+		`);
+	} catch (err) {
+		console.log('Dedup error:', err.message);
+	}
+
 	console.log("Finished scraping venues");
 	return results;
 };

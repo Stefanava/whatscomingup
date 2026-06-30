@@ -2,36 +2,36 @@ const getVenues = require('./utils/get-venues');
 const getEvents = require('./utils/get-events');
 
 const VENUE_COLORS = {
-  bgwmc:                '#ff5252',
-  coven:                '#b06cff',
+  bgwmc: '#ff5252',
+  coven: '#b06cff',
   'dalston-superstore': '#1fd3c3',
-  fire:                 '#ff7a18',
-  heaven:               '#3d8bff',
-  lightbox:             '#ffc233',
-  rvt:                  '#3ddc84',
-  divine:               '#ff3d9a',
-  eagle:                '#7b7bff',
-  'two-brewers':        '#f0a23c',
-  'white-swan':         '#ff6dc4',
-  xoyo:                 '#19d0ff',
-  comptons:             '#4ade80',
+  fire: '#ff7a18',
+  heaven: '#3d8bff',
+  lightbox: '#ffc233',
+  rvt: '#3ddc84',
+  divine: '#ff3d9a',
+  eagle: '#7b7bff',
+  'two-brewers': '#f0a23c',
+  'white-swan': '#ff6dc4',
+  xoyo: '#19d0ff',
+  comptons: '#4ade80',
   'duke-of-wellington': '#fbbf24',
-  'bar-soho':           '#f472b6',
-  'halfway-to-heaven':  '#38bdf8',
-  freedom:              '#f87171',
-  howl:                 '#f472b6',
-  sextou:               '#fb923c',
-  'tech-couture':       '#a78bfa',
-  smut:                 '#f43f5e',
-  fold:                 '#34d399',
-  'maiden-voyage':      '#38bdf8',
-  'body-movements':     '#fbbf24',
-  'club-are':           '#818cf8',
+  'bar-soho': '#f472b6',
+  'halfway-to-heaven': '#38bdf8',
+  freedom: '#f87171',
+  howl: '#f472b6',
+  sextou: '#fb923c',
+  'tech-couture': '#a78bfa',
+  smut: '#f43f5e',
+  fold: '#34d399',
+  'maiden-voyage': '#38bdf8',
+  'body-movements': '#fbbf24',
+  'club-are': '#818cf8',
 };
 
-const WD_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-const WD_LONG  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const MONTHS   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const WD_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WD_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function col(slug) { return VENUE_COLORS[slug] || '#ff3d9a'; }
 
@@ -58,7 +58,7 @@ function fmtToday() {
 
 function dateKey(dateVal) {
   const d = new Date(dateVal);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 function dayId(key) { return 'd-' + key; }
@@ -84,14 +84,14 @@ function buildHeader(venues, days) {
     <div style="height:5px;background:#ffb3d6;"></div>
     <div class="nin-header-inner" style="max-width:1280px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
       <div style="display:flex;align-items:baseline;gap:14px;">
-        <div style="font-weight:800;font-size:26px;letter-spacing:-0.03em;line-height:1;color:#ffb3d6;">what's nin?</div>
+        <div style="font-weight:800;font-size:26px;letter-spacing:-0.03em;line-height:1;color:#ffb3d6;">whats 'appnin?</div>
         <div class="nin-tagline" style="font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8f8898;">queer london · nightly</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <div class="nin-today" style="font-family:'Spline Sans Mono',monospace;font-size:12px;color:#8f8898;">${fmtToday()}</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <span id="last-scraped" class="nin-last-scraped" style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#6f6878;"></span>
-          <button id="btn-scrape" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#8f8898;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:99px;padding:8px 14px;cursor:pointer;">Refresh</button>
+          <button id="btn-scrape" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#8f8898;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:99px;padding:8px 14px;cursor:pointer;">Get latest</button>
         </div>
         <button id="btn-tonight" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#0c0b0f;background:#ffb3d6;border:none;border-radius:99px;padding:8px 14px;cursor:pointer;">Tonight</button>
       </div>
@@ -161,7 +161,7 @@ function buildPage(venues, days) {
     <main class="nin-main" style="max-width:1280px;margin:0 auto;padding:0 28px 80px;">
       ${days.map(day => buildSection(day, venueMap)).join('')}
       <footer style="margin-top:64px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <div style="font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#ffb3d6;">what's nin?</div>
+        <div style="font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#ffb3d6;">whats 'appnin?</div>
         <div style="font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#6f6878;text-align:right;">a love letter to queer london nightlife<br>got a night to list? hello@whatsnin.london</div>
       </footer>
     </main>`;
@@ -189,16 +189,16 @@ function renderFilter() {
   const isAll = activeFilters.size === 0;
 
   const allPill = document.getElementById('pill-all');
-  allPill.style.border     = isAll ? '1px solid #f3efe9'             : '1px solid rgba(255,255,255,0.1)';
-  allPill.style.background = isAll ? '#f3efe9'                        : 'rgba(255,255,255,0.03)';
-  allPill.style.color      = isAll ? '#0c0b0f'                        : '#cabfd4';
+  allPill.style.border = isAll ? '1px solid #f3efe9' : '1px solid rgba(255,255,255,0.1)';
+  allPill.style.background = isAll ? '#f3efe9' : 'rgba(255,255,255,0.03)';
+  allPill.style.color = isAll ? '#0c0b0f' : '#cabfd4';
 
   document.querySelectorAll('.venue-pill').forEach(pill => {
     const active = activeFilters.has(pill.dataset.slug);
     const color = col(pill.dataset.slug);
-    pill.style.border     = active ? `1px solid ${color}`            : '1px solid rgba(255,255,255,0.1)';
-    pill.style.background = active ? color                            : 'rgba(255,255,255,0.03)';
-    pill.style.color      = active ? '#0c0b0f'                        : '#cabfd4';
+    pill.style.border = active ? `1px solid ${color}` : '1px solid rgba(255,255,255,0.1)';
+    pill.style.background = active ? color : 'rgba(255,255,255,0.03)';
+    pill.style.color = active ? '#0c0b0f' : '#cabfd4';
   });
 
   document.querySelectorAll('.event-card').forEach(card => {
@@ -209,12 +209,12 @@ function renderFilter() {
     const key = section.dataset.day;
     const visible = Array.from(section.querySelectorAll('.event-card'))
       .filter(el => el.style.display !== 'none').length;
-    section.querySelector('.event-grid').style.display  = visible ? '' : 'none';
+    section.querySelector('.event-grid').style.display = visible ? '' : 'none';
     section.querySelector('.empty-state').style.display = visible ? 'none' : '';
 
-    const countEl   = document.querySelector(`.day-count[data-day="${key}"]`);
+    const countEl = document.querySelector(`.day-count[data-day="${key}"]`);
     const summaryEl = document.querySelector(`.day-summary[data-day="${key}"]`);
-    if (countEl)   countEl.textContent   = visible ? String(visible) : '';
+    if (countEl) countEl.textContent = visible ? String(visible) : '';
     if (summaryEl) summaryEl.textContent = visible
       ? `${visible} night${visible !== 1 ? 's' : ''}`
       : 'filtered';
@@ -263,7 +263,7 @@ function attachHandlers() {
     scrapeBtn.disabled = true;
     scrapeBtn.style.opacity = '0.5';
     try {
-      await fetch('/scrape-venues');
+      await fetch('/refresh-events');
       const now = new Date().toISOString();
       localStorage.setItem('nin_last_scraped', now);
       updateLastScraped();
@@ -271,7 +271,7 @@ function attachHandlers() {
     } catch (_) {
       scrapeBtn.textContent = 'Error';
       setTimeout(() => {
-        scrapeBtn.textContent = 'Refresh';
+        scrapeBtn.textContent = 'Get latest';
         scrapeBtn.disabled = false;
         scrapeBtn.style.opacity = '1';
       }, 3000);

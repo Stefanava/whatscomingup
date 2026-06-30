@@ -59,6 +59,76 @@ app.get('/scrape-venues', cors(), async (req, res) => {
 	}
 });
 
+const DEDUP_SQL = `
+	DELETE FROM events a
+	USING events b
+	WHERE a.ctid > b.ctid
+	  AND a.title = b.title
+	  AND a.date = b.date
+`;
+
+app.get('/refresh-events', cors(), async (req, res) => {
+	try {
+		const { rows: existing } = await pool.query(
+			"SELECT link FROM events WHERE date > NOW()"
+		);
+		const existingLinks = new Set(existing.map(r => r.link));
+
+		const { rows: venues } = await pool.query("SELECT * FROM venues WHERE active = 'TRUE'");
+		const results = [];
+
+		for (const venue of venues) {
+			const { slug, name, url } = venue;
+			const result = { name, eventsInserted: 0, error: null };
+			const scraper = scrapers[slug];
+
+			if (!scraper) { result.error = 'No scraper found'; results.push(result); continue; }
+			if (!scraper.fetchEvents && !url) { result.error = 'No URL set'; results.push(result); continue; }
+
+			try {
+				let events;
+				if (scraper.fetchEvents) {
+					events = await scraper.fetchEvents();
+				} else {
+					const pageHTMLAsText = await fetch(url).then(r => r.text());
+					const { document } = new JSDOM(pageHTMLAsText).window;
+					events = scraper.getAllEvents(document);
+				}
+
+				const moment = require('moment');
+				const valueParts = [];
+				events.forEach(event => {
+					const { date, title, image_url, time, cost, description, link } = event;
+					if (!existingLinks.has(link) && moment(new Date(date)).isAfter(moment(new Date()), 'day')) {
+						valueParts.push(`('${date ? moment(new Date(date)).toISOString() : ''}', '${title ? title.replace(/'/g, "") : ''}', '${image_url || ''}', '${time || ''}', ${cost ? `'${cost}'` : 'NULL'}, '${description ? description.replace(/'/g, "") : ''}', '${link}', '${slug}')`);
+					}
+				});
+
+				if (valueParts.length) {
+					await pool.query(`INSERT INTO events (date, title, image_url, time, cost, description, link, venue) VALUES ${valueParts.join(', ')}`);
+				}
+				result.eventsInserted = valueParts.length;
+			} catch (err) {
+				console.log(`Error refreshing ${slug}:`, err.message);
+				result.error = err.message;
+			}
+
+			results.push(result);
+		}
+
+		await pool.query(DEDUP_SQL);
+
+		const rows = results.map(({ name, eventsInserted, error }) => {
+			const status = error ? `❌ ${error}` : `✅ ${eventsInserted} new event${eventsInserted !== 1 ? 's' : ''}`;
+			return `<tr><td>${name}</td><td>${status}</td></tr>`;
+		}).join('');
+		res.send(`<h1>Refresh complete</h1><table border="1" cellpadding="6"><tr><th>Venue</th><th>Result</th></tr>${rows}</table>`);
+	} catch (err) {
+		console.log(err);
+		res.send(`<h1>Refresh failed</h1><pre>${err.message}</pre>`);
+	}
+});
+
 app.get('/update-event-details', cors(), async (req, res) => {
 	await updateEventDetails();
 	res.send([]);
