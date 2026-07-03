@@ -56,6 +56,35 @@ function fmtToday() {
   return `${WD_SHORT[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// ── favourites ────────────────────────────────────────────────────────────────
+
+function getFavourites() {
+  try { return new Set(JSON.parse(localStorage.getItem('nin_favourites') || '[]')); }
+  catch (_) { return new Set(); }
+}
+
+function saveFavourites(set) {
+  localStorage.setItem('nin_favourites', JSON.stringify([...set]));
+}
+
+const favourites = getFavourites();
+
+function toggleFavourite(slug) {
+  if (favourites.has(slug)) { favourites.delete(slug); } else { favourites.add(slug); }
+  saveFavourites(favourites);
+  renderFavourites();
+}
+
+function renderFavourites() {
+  const myPill = document.getElementById('pill-my-venues');
+  if (myPill) myPill.style.display = favourites.size > 0 ? '' : 'none';
+  document.querySelectorAll('.fav-heart').forEach(heart => {
+    const isFav = favourites.has(heart.dataset.slug);
+    heart.textContent = isFav ? '♥' : '♡';
+    heart.style.color = isFav ? '#ff3d9a' : 'rgba(255,255,255,0.25)';
+  });
+}
+
 function dateKey(dateVal) {
   const d = new Date(dateVal);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -68,7 +97,7 @@ function dayId(key) { return 'd-' + key; }
 function buildHeader(venues, days) {
   const venuePills = venues.map(v => {
     const color = col(v.slug);
-    return `<button class="venue-pill" data-slug="${v.slug}" style="flex:0 0 auto;display:flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.01em;padding:7px 14px;border-radius:99px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;"><span style="width:9px;height:9px;border-radius:99px;background:${color};flex:0 0 auto;"></span>${esc(v.name)}</button>`;
+    return `<button class="venue-pill" data-slug="${v.slug}" style="flex:0 0 auto;display:flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.01em;padding:7px 14px;border-radius:99px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;"><span style="width:9px;height:9px;border-radius:99px;background:${color};flex:0 0 auto;"></span>${esc(v.name)}<span class="fav-heart" data-slug="${v.slug}" style="margin-left:2px;font-size:11px;line-height:1;color:rgba(255,255,255,0.25);cursor:pointer;">♡</span></button>`;
   }).join('');
 
   const dayPills = days.map(day => {
@@ -94,10 +123,12 @@ function buildHeader(venues, days) {
           <button id="btn-scrape" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#8f8898;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:99px;padding:8px 14px;cursor:pointer;">Get latest</button>
         </div>
         <button id="btn-tonight" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#0c0b0f;background:#ffb3d6;border:none;border-radius:99px;padding:8px 14px;cursor:pointer;">Tonight</button>
+        <div id="auth-area" style="display:flex;align-items:center;"></div>
       </div>
     </div>
     <div id="header-collapsible" style="overflow:hidden;max-height:0;opacity:0;transition:max-height 0.35s ease,opacity 0.2s ease;">
       <div class="nin-pills-row nin-scroll" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="pill-my-venues" style="display:none;flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:none;background:#ff3d9a;color:#0c0b0f;transition:all 0.15s;">My venues ♥</button>
         <button id="pill-all" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid #f3efe9;background:#f3efe9;color:#0c0b0f;transition:all 0.15s;">All venues</button>
         ${venuePills}
       </div>
@@ -288,6 +319,24 @@ function attachHandlers() {
     pill.addEventListener('click', () => toggleFilter(pill.dataset.slug));
   });
 
+  document.querySelectorAll('.fav-heart').forEach(heart => {
+    heart.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleFavourite(heart.dataset.slug);
+    });
+  });
+
+  const myVenuesPill = document.getElementById('pill-my-venues');
+  if (myVenuesPill) {
+    myVenuesPill.addEventListener('click', () => {
+      clearFilters();
+      favourites.forEach(slug => activeFilters.add(slug));
+      renderFilter();
+    });
+  }
+
+  renderFavourites();
+
   document.querySelectorAll('.day-pill').forEach(pill => {
     pill.addEventListener('click', () => {
       const el = document.getElementById(pill.dataset.target);
@@ -296,6 +345,37 @@ function attachHandlers() {
       window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
     });
   });
+}
+
+// ── auth ──────────────────────────────────────────────────────────────────────
+
+async function initAuth() {
+  const authArea = document.getElementById('auth-area');
+  if (!authArea) return;
+  try {
+    const data = await fetch('/auth/me').then(r => r.json());
+    if (data && data.user) {
+      if (window.location.search.includes('loggedIn=1')) {
+        await fetch('/auth/favourites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ venues: [...favourites] }),
+        });
+        history.replaceState({}, '', '/');
+      }
+      if (data.favourites && data.favourites.length) {
+        data.favourites.forEach(slug => favourites.add(slug));
+        saveFavourites(favourites);
+        renderFavourites();
+      }
+      authArea.innerHTML = `<div style="display:flex;align-items:center;gap:8px;">
+        ${data.user.picture ? `<img src="${esc(data.user.picture)}" style="width:26px;height:26px;border-radius:99px;object-fit:cover;" alt="">` : ''}
+        <a href="/auth/logout" style="font-family:'Spline Sans Mono',monospace;font-size:11px;color:#8f8898;text-decoration:none;border:1px solid rgba(255,255,255,0.12);border-radius:99px;padding:5px 10px;">Sign out</a>
+      </div>`;
+    } else if (data && data.authAvailable) {
+      authArea.innerHTML = `<a href="/auth/google" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;text-decoration:none;color:#8f8898;border:1px solid rgba(255,255,255,0.12);border-radius:99px;padding:8px 14px;">Sign in</a>`;
+    }
+  } catch (_) {}
 }
 
 // ── init ──────────────────────────────────────────────────────────────────────
@@ -323,6 +403,7 @@ async function run() {
 
     document.getElementById('app').innerHTML = buildPage(venues, days);
     attachHandlers();
+    initAuth();
   } catch (err) {
     console.error(err);
     document.getElementById('app').innerHTML = `

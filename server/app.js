@@ -3,6 +3,9 @@ const express = require('express')
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors')
+const session = require('express-session');
+const PgSession = require('connect-pg-simple')(session);
+const passport = require('./passport');
 const pool = require('../public/js/utils/db');
 const { JSDOM } = require('jsdom');
 const scrapers = require('./venues');
@@ -10,7 +13,17 @@ const scrapeVenues = require('../public/js/utils/scrape-venues');
 const updateEventDetails = require('../public/js/utils/update-event-details');
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+
+app.use(session({
+	store: new PgSession({ pool, createTableIfMissing: true }),
+	secret: process.env.SESSION_SECRET || 'nin-dev-secret',
+	resave: false,
+	saveUninitialized: false,
+	cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(express.static('dist'));
 
@@ -127,6 +140,57 @@ app.get('/refresh-events', cors(), async (req, res) => {
 		console.log(err);
 		res.send(`<h1>Refresh failed</h1><pre>${err.message}</pre>`);
 	}
+});
+
+// ── auth ──────────────────────────────────────────────────────────────────────
+
+app.get('/auth/me', cors(), async (req, res) => {
+	const authAvailable = !!process.env.GOOGLE_CLIENT_ID;
+	if (!req.user) return res.json({ user: null, authAvailable });
+	try {
+		const { rows } = await pool.query(
+			'SELECT venue_slug FROM user_favourites WHERE user_id = $1',
+			[req.user.id]
+		);
+		res.json({ user: req.user, favourites: rows.map(r => r.venue_slug), authAvailable });
+	} catch (_) {
+		res.json({ user: req.user, favourites: [], authAvailable });
+	}
+});
+
+app.post('/auth/favourites', cors(), async (req, res) => {
+	if (!req.user) return res.status(401).json({ error: 'Not logged in' });
+	const { venues } = req.body;
+	if (!Array.isArray(venues)) return res.status(400).json({ error: 'venues must be an array' });
+	try {
+		await pool.query('DELETE FROM user_favourites WHERE user_id = $1', [req.user.id]);
+		if (venues.length) {
+			const values = venues.map((_, i) => `($1, $${i + 2})`).join(', ');
+			await pool.query(
+				`INSERT INTO user_favourites (user_id, venue_slug) VALUES ${values}`,
+				[req.user.id, ...venues]
+			);
+		}
+		res.json({ ok: true });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+if (process.env.GOOGLE_CLIENT_ID) {
+	app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+	app.get('/auth/google/callback',
+		passport.authenticate('google', { failureRedirect: '/' }),
+		(req, res) => res.redirect('/?loggedIn=1')
+	);
+}
+
+app.get('/auth/logout', (req, res, next) => {
+	req.logout(err => {
+		if (err) return next(err);
+		res.redirect('/');
+	});
 });
 
 app.get('/update-event-details', cors(), async (req, res) => {
