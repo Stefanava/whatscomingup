@@ -1,0 +1,27 @@
+ALTER TABLE venues ADD COLUMN IF NOT EXISTS color TEXT;
+
+UPDATE venues SET color = '#ff5252' WHERE slug = 'bgwmc';
+UPDATE venues SET color = '#b06cff' WHERE slug = 'coven';
+UPDATE venues SET color = '#1fd3c3' WHERE slug = 'dalston-superstore';
+UPDATE venues SET color = '#ff7a18' WHERE slug = 'fire';
+UPDATE venues SET color = '#3d8bff' WHERE slug = 'heaven';
+UPDATE venues SET color = '#ffc233' WHERE slug = 'lightbox';
+UPDATE venues SET color = '#3ddc84' WHERE slug = 'rvt';
+UPDATE venues SET color = '#ff3d9a' WHERE slug = 'divine';
+UPDATE venues SET color = '#7b7bff' WHERE slug = 'eagle';
+UPDATE venues SET color = '#f0a23c' WHERE slug = 'two-brewers';
+UPDATE venues SET color = '#ff6dc4' WHERE slug = 'white-swan';
+UPDATE venues SET color = '#19d0ff' WHERE slug = 'xoyo';
+UPDATE venues SET color = '#4ade80' WHERE slug = 'comptons';
+UPDATE venues SET color = '#fbbf24' WHERE slug = 'duke-of-wellington';
+UPDATE venues SET color = '#f472b6' WHERE slug = 'bar-soho';
+UPDATE venues SET color = '#38bdf8' WHERE slug = 'halfway-to-heaven';
+UPDATE venues SET color = '#f87171' WHERE slug = 'freedom';
+UPDATE venues SET color = '#f472b6' WHERE slug = 'howl';
+UPDATE venues SET color = '#fb923c' WHERE slug = 'sextou';
+UPDATE venues SET color = '#a78bfa' WHERE slug = 'tech-couture';
+UPDATE venues SET color = '#f43f5e' WHERE slug = 'smut';
+UPDATE venues SET color = '#34d399' WHERE slug = 'fold';
+UPDATE venues SET color = '#38bdf8' WHERE slug = 'maiden-voyage';
+UPDATE venues SET color = '#fbbf24' WHERE slug = 'body-movements';
+UPDATE venues SET color = '#818cf8' WHERE slug = 'club-are';

@@ -7,17 +7,29 @@ const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
 const passport = require('./passport');
 const pool = require('../public/js/utils/db');
-const { JSDOM } = require('jsdom');
-const scrapers = require('./venues');
-const scrapeVenues = require('../public/js/utils/scrape-venues');
-const updateEventDetails = require('../public/js/utils/update-event-details');
+
+// All venue-specific scraping/extraction logic lives in Supabase Edge
+// Functions (supabase/functions/) — this app has no knowledge of how any
+// given venue's events are gathered, only how to ask Supabase to do it.
+async function callEdgeFunction(name, { searchParams } = {}) {
+	const base = process.env.SUPABASE_URL;
+	const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+	if (!base || !key) throw new Error('SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY not configured');
+
+	const url = new URL(`${base}/functions/v1/${name}`);
+	if (searchParams) Object.entries(searchParams).forEach(([k, v]) => url.searchParams.set(k, v));
+
+	const response = await fetch(url, { headers: { Authorization: `Bearer ${key}` } });
+	if (!response.ok) throw new Error(`Edge function ${name} responded ${response.status}`);
+	return response.json();
+}
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(session({
 	store: new PgSession({ pool, createTableIfMissing: true }),
-	secret: process.env.SESSION_SECRET || 'nin-dev-secret',
+	secret: process.env.SESSION_SECRET || 'wcu-dev-secret',
 	resave: false,
 	saveUninitialized: false,
 	cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
@@ -59,86 +71,19 @@ app.get('/get-events', cors(), async (req, res) => {
 
 app.get('/scrape-venues', cors(), async (req, res) => {
 	try {
-		await pool.query('TRUNCATE TABLE events');
-		const results = await scrapeVenues();
-		const rows = results.map(({ name, eventsInserted, error }) => {
-			const status = error ? `❌ ${error}` : `✅ ${eventsInserted} event${eventsInserted !== 1 ? 's' : ''}`;
-			return `<tr><td>${name}</td><td>${status}</td></tr>`;
-		}).join('');
-		res.send(`<h1>Scrape complete</h1><table border="1" cellpadding="6"><tr><th>Venue</th><th>Result</th></tr>${rows}</table>`);
+		res.json(await callEdgeFunction('refresh-events', { searchParams: { mode: 'full' } }));
 	} catch (err) {
 		console.log(err);
-		res.send(`<h1>Scrape failed</h1><pre>${err.message}</pre>`);
+		res.status(500).json({ error: err.message });
 	}
 });
 
-const DEDUP_SQL = `
-	DELETE FROM events a
-	USING events b
-	WHERE a.ctid > b.ctid
-	  AND a.title = b.title
-	  AND a.date = b.date
-`;
-
 app.get('/refresh-events', cors(), async (req, res) => {
 	try {
-		const { rows: existing } = await pool.query(
-			"SELECT link FROM events WHERE date > NOW()"
-		);
-		const existingLinks = new Set(existing.map(r => r.link));
-
-		const { rows: venues } = await pool.query("SELECT * FROM venues WHERE active = 'TRUE'");
-		const results = [];
-
-		for (const venue of venues) {
-			const { slug, name, url } = venue;
-			const result = { name, eventsInserted: 0, error: null };
-			const scraper = scrapers[slug];
-
-			if (!scraper) { result.error = 'No scraper found'; results.push(result); continue; }
-			if (!scraper.fetchEvents && !url) { result.error = 'No URL set'; results.push(result); continue; }
-
-			try {
-				let events;
-				if (scraper.fetchEvents) {
-					events = await scraper.fetchEvents();
-				} else {
-					const pageHTMLAsText = await fetch(url).then(r => r.text());
-					const { document } = new JSDOM(pageHTMLAsText).window;
-					events = scraper.getAllEvents(document);
-				}
-
-				const moment = require('moment');
-				const valueParts = [];
-				events.forEach(event => {
-					const { date, title, image_url, time, cost, description, link } = event;
-					if (!existingLinks.has(link) && moment(new Date(date)).isAfter(moment(new Date()), 'day')) {
-						valueParts.push(`('${date ? moment(new Date(date)).toISOString() : ''}', '${title ? title.replace(/'/g, "") : ''}', '${image_url || ''}', '${time || ''}', ${cost ? `'${cost}'` : 'NULL'}, '${description ? description.replace(/'/g, "") : ''}', '${link}', '${slug}')`);
-					}
-				});
-
-				if (valueParts.length) {
-					await pool.query(`INSERT INTO events (date, title, image_url, time, cost, description, link, venue) VALUES ${valueParts.join(', ')}`);
-				}
-				result.eventsInserted = valueParts.length;
-			} catch (err) {
-				console.log(`Error refreshing ${slug}:`, err.message);
-				result.error = err.message;
-			}
-
-			results.push(result);
-		}
-
-		await pool.query(DEDUP_SQL);
-
-		const rows = results.map(({ name, eventsInserted, error }) => {
-			const status = error ? `❌ ${error}` : `✅ ${eventsInserted} new event${eventsInserted !== 1 ? 's' : ''}`;
-			return `<tr><td>${name}</td><td>${status}</td></tr>`;
-		}).join('');
-		res.send(`<h1>Refresh complete</h1><table border="1" cellpadding="6"><tr><th>Venue</th><th>Result</th></tr>${rows}</table>`);
+		res.json(await callEdgeFunction('refresh-events'));
 	} catch (err) {
 		console.log(err);
-		res.send(`<h1>Refresh failed</h1><pre>${err.message}</pre>`);
+		res.status(500).json({ error: err.message });
 	}
 });
 
@@ -194,30 +139,21 @@ app.get('/auth/logout', (req, res, next) => {
 });
 
 app.get('/update-event-details', cors(), async (req, res) => {
-	await updateEventDetails();
-	res.send([]);
-});
-
-async function getVenueUrl(slug) {
-	const { rows } = await pool.query('SELECT url FROM venues WHERE slug = $1', [slug]);
-	return rows[0]?.url;
-}
-
-async function scrapeVenueRoute(slug, scraper, res) {
 	try {
-		const url = await getVenueUrl(slug);
-		if (!url) throw new Error(`No URL found for venue: ${slug}`);
-		const pageHTMLAsText = await fetch(url).then(r => r.text());
-		const { document } = new JSDOM(pageHTMLAsText).window;
-		res.send(scraper.getAllEvents(document));
+		res.json(await callEdgeFunction('update-event-details'));
 	} catch (err) {
 		console.log(err);
-		res.send([]);
+		res.status(500).json({ error: err.message });
 	}
-}
+});
 
-Object.entries(scrapers).forEach(([slug, scraper]) => {
-	app.get(`/${slug}`, cors(), (req, res) => scrapeVenueRoute(slug, scraper, res));
+app.get('/venue/:slug/preview', cors(), async (req, res) => {
+	try {
+		res.json(await callEdgeFunction('refresh-events', { searchParams: { slug: req.params.slug } }));
+	} catch (err) {
+		console.log(err);
+		res.status(500).json({ error: err.message });
+	}
 });
 
 module.exports = app;

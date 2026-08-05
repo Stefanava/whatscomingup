@@ -1,49 +1,36 @@
 {
-  "name": "whatsappnin",
+  "name": "whatscomingup",
   "version": "1.0.0",
-  "description": "App used to find cost savings in the IP AWS estate",
+  "description": "Queer London nightlife listings",
   "engines": {
     "node": "^18.0.0"
   },
   "main": "app.js",
   "scripts": {
     "start": "npm run build && nodemon server/index.js",
-    "build": "parcel build ./index.html",
-    "vault:env": "vault read secret/teams/internal-products/ip-usage-reporter/development | tail -n +3 | awk '{$2=$2};1' | tr \" \" \"=\" > .env",
-    "vault-login": "vault login --method=github token=$VAULT_AUTH_GITHUB_TOKEN"
+    "build": "parcel build ./index.html"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Financial-Times/ip-usage-reporter.git"
+    "url": "git+https://github.com/Stefanava/whatsappnin.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Financial-Times/ip-usage-reporter/issues"
+    "url": "https://github.com/Stefanava/whatsappnin/issues"
   },
-  "homepage": "https://github.com/Financial-Times/ip-usage-reporter#readme",
+  "homepage": "https://github.com/Stefanava/whatsappnin#readme",
   "dependencies": {
-    "@financial-times/health-check": "^1.6.1",
-    "@financial-times/n-logger": "^8.0.0",
-    "@financial-times/sheet-reader": "0.0.0",
-    "bertha-client": "^4.0.1",
     "body-parser": "^1.19.0",
-    "chart.js": "^2.9.3",
-    "chartjs-plugin-annotation": "^0.5.7",
-    "chartjs-plugin-datalabels": "^0.7.0",
     "connect-pg-simple": "^10.0.0",
     "core-js": "^2.6.12",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "eslint-plugin-jest": "^23.20.0",
     "express": "^4.17.1",
-    "express-handlebars": "^3.1.0",
     "express-session": "^1.19.0",
-    "jsdom": "^14.1.0",
-    "moment": "^2.29.0",
     "nodemon": "^2.0.4",
     "parcel-bundler": "^1.12.4",
-    "parcel-plugin-handlebars": "^0.4.4",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.22.0",
@@ -55,6 +42,5 @@
     "@babel/node": "^7.10.5",
     "@babel/plugin-proposal-export-default-from": "^7.10.4",
     "@babel/preset-env": "^7.11.5"
-  },
-  "Heroku-run-build-script": true
+  }
 }

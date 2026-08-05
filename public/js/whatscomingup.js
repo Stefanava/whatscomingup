@@ -1,33 +1,7 @@
 const getVenues = require('./utils/get-venues');
 const getEvents = require('./utils/get-events');
 
-const VENUE_COLORS = {
-  bgwmc: '#ff5252',
-  coven: '#b06cff',
-  'dalston-superstore': '#1fd3c3',
-  fire: '#ff7a18',
-  heaven: '#3d8bff',
-  lightbox: '#ffc233',
-  rvt: '#3ddc84',
-  divine: '#ff3d9a',
-  eagle: '#7b7bff',
-  'two-brewers': '#f0a23c',
-  'white-swan': '#ff6dc4',
-  xoyo: '#19d0ff',
-  comptons: '#4ade80',
-  'duke-of-wellington': '#fbbf24',
-  'bar-soho': '#f472b6',
-  'halfway-to-heaven': '#38bdf8',
-  freedom: '#f87171',
-  howl: '#f472b6',
-  sextou: '#fb923c',
-  'tech-couture': '#a78bfa',
-  smut: '#f43f5e',
-  fold: '#34d399',
-  'maiden-voyage': '#38bdf8',
-  'body-movements': '#fbbf24',
-  'club-are': '#818cf8',
-};
+let VENUE_COLORS = {};
 
 const WD_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const WD_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -59,12 +33,12 @@ function fmtToday() {
 // ── favourites ────────────────────────────────────────────────────────────────
 
 function getFavourites() {
-  try { return new Set(JSON.parse(localStorage.getItem('nin_favourites') || '[]')); }
+  try { return new Set(JSON.parse(localStorage.getItem('wcu_favourites') || '[]')); }
   catch (_) { return new Set(); }
 }
 
 function saveFavourites(set) {
-  localStorage.setItem('nin_favourites', JSON.stringify([...set]));
+  localStorage.setItem('wcu_favourites', JSON.stringify([...set]));
 }
 
 const favourites = getFavourites();
@@ -97,7 +71,7 @@ function dayId(key) { return 'd-' + key; }
 function buildHeader(venues, days) {
   const venuePills = venues.map(v => {
     const color = col(v.slug);
-    return `<button class="venue-pill" data-slug="${v.slug}" style="flex:0 0 auto;display:flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.01em;padding:7px 14px;border-radius:99px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;"><span style="width:9px;height:9px;border-radius:99px;background:${color};flex:0 0 auto;"></span>${esc(v.name)}<span class="fav-heart" data-slug="${v.slug}" style="margin-left:2px;font-size:11px;line-height:1;color:rgba(255,255,255,0.25);cursor:pointer;">♡</span></button>`;
+    return `<button class="venue-pill" data-slug="${v.slug}" data-type="${v.venue_type || 'venue'}" style="flex:0 0 auto;display:flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.01em;padding:7px 14px;border-radius:99px;cursor:pointer;white-space:nowrap;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;"><span style="width:9px;height:9px;border-radius:99px;background:${color};flex:0 0 auto;"></span>${esc(v.name)}<span class="fav-heart" data-slug="${v.slug}" style="margin-left:2px;font-size:11px;line-height:1;color:rgba(255,255,255,0.25);cursor:pointer;">♡</span></button>`;
   }).join('');
 
   const dayPills = days.map(day => {
@@ -130,6 +104,8 @@ function buildHeader(venues, days) {
       <div class="nin-pills-row nin-scroll" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:8px;flex-wrap:wrap;">
         <button id="pill-my-venues" style="display:none;flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:none;background:#ff3d9a;color:#0c0b0f;transition:all 0.15s;">My venues ♥</button>
         <button id="pill-all" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid #f3efe9;background:#f3efe9;color:#0c0b0f;transition:all 0.15s;">All venues</button>
+        <button id="pill-filter-venues" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;">Venues</button>
+        <button id="pill-filter-promoters" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;">Club nights</button>
         ${venuePills}
       </div>
       <nav class="nin-scroll nin-day-nav" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:6px;overflow-x:auto;border-top:1px solid rgba(255,255,255,0.05);">
@@ -232,6 +208,17 @@ function renderFilter() {
     pill.style.color = active ? '#0c0b0f' : '#cabfd4';
   });
 
+  const setTypePillActive = (id, type) => {
+    const slugs = Array.from(document.querySelectorAll(`.venue-pill[data-type="${type}"]`)).map(p => p.dataset.slug);
+    const active = slugs.length > 0 && activeFilters.size === slugs.length && slugs.every(s => activeFilters.has(s));
+    const pill = document.getElementById(id);
+    pill.style.border = active ? '1px solid #f3efe9' : '1px solid rgba(255,255,255,0.1)';
+    pill.style.background = active ? '#f3efe9' : 'rgba(255,255,255,0.03)';
+    pill.style.color = active ? '#0c0b0f' : '#cabfd4';
+  };
+  setTypePillActive('pill-filter-venues', 'venue');
+  setTypePillActive('pill-filter-promoters', 'promoter');
+
   document.querySelectorAll('.event-card').forEach(card => {
     card.style.display = (isAll || activeFilters.has(card.dataset.venue)) ? '' : 'none';
   });
@@ -278,7 +265,7 @@ function attachHandlers() {
   const lastScrapedEl = document.getElementById('last-scraped');
 
   const updateLastScraped = () => {
-    const ts = localStorage.getItem('nin_last_scraped');
+    const ts = localStorage.getItem('wcu_last_scraped');
     if (ts) {
       const d = new Date(ts);
       const str = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
@@ -296,7 +283,7 @@ function attachHandlers() {
     try {
       await fetch('/refresh-events');
       const now = new Date().toISOString();
-      localStorage.setItem('nin_last_scraped', now);
+      localStorage.setItem('wcu_last_scraped', now);
       updateLastScraped();
       window.location.reload();
     } catch (_) {
@@ -314,6 +301,14 @@ function attachHandlers() {
   });
 
   document.getElementById('pill-all').addEventListener('click', () => clearFilters());
+
+  const filterByType = (type) => {
+    clearFilters();
+    document.querySelectorAll(`.venue-pill[data-type="${type}"]`).forEach(p => activeFilters.add(p.dataset.slug));
+    renderFilter();
+  };
+  document.getElementById('pill-filter-venues').addEventListener('click', () => filterByType('venue'));
+  document.getElementById('pill-filter-promoters').addEventListener('click', () => filterByType('promoter'));
 
   document.querySelectorAll('.venue-pill').forEach(pill => {
     pill.addEventListener('click', () => toggleFilter(pill.dataset.slug));
@@ -383,6 +378,7 @@ async function initAuth() {
 async function run() {
   try {
     const [venues, events] = await Promise.all([getVenues({ active: 'TRUE' }), getEvents()]);
+    VENUE_COLORS = Object.fromEntries(venues.map(v => [v.slug, v.color || '#ff3d9a']));
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
