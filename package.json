@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Stefanava/whatsappnin.git"
+    "url": "git+https://github.com/Stefanava/whatscomingup.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Stefanava/whatsappnin/issues"
+    "url": "https://github.com/Stefanava/whatscomingup/issues"
   },
-  "homepage": "https://github.com/Stefanava/whatsappnin#readme",
+  "homepage": "https://github.com/Stefanava/whatscomingup#readme",
   "dependencies": {
     "body-parser": "^2.3.0",
     "connect-pg-simple": "^10.0.0",
