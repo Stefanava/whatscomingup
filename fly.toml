@@ -1,15 +1,15 @@
-# fly.toml app configuration file generated for whatsappnin on 2026-06-29T17:05:01Z
+# fly.toml app configuration file generated for whatscomingup on 2026-08-06T11:39:56Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
 app = 'whatscomingup'
-primary_region = 'iad'
+primary_region = 'ams'
 
 [build]
 
 [http_service]
-  internal_port = 3000
+  internal_port = 8080
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
