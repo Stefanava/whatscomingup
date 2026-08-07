@@ -1,5 +1,7 @@
 # What's Coming Up
 
+**Live:** https://whatscomingup.fly.dev
+
 A listings site for queer nightlife in London. It pulls upcoming events from ~30 venues and club nights into one place, lets you filter by venue, and (optionally) lets you sign in with Google to save favourites.
 
 ## How AI was used

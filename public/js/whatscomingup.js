@@ -87,7 +87,7 @@ function buildHeader(venues, days) {
     <div style="height:5px;background:#ffb3d6;"></div>
     <div class="nin-header-inner" style="max-width:1280px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
       <div style="display:flex;align-items:baseline;gap:14px;">
-        <div style="font-weight:800;font-size:26px;letter-spacing:-0.03em;line-height:1;color:#ffb3d6;">whats 'appnin?</div>
+        <div style="font-weight:800;font-size:26px;letter-spacing:-0.03em;line-height:1;color:#ffb3d6;">whatscomingup?</div>
         <div class="nin-tagline" style="font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8f8898;">queer london · nightly</div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -168,7 +168,7 @@ function buildPage(venues, days) {
     <main class="nin-main" style="max-width:1280px;margin:0 auto;padding:0 28px 80px;">
       ${days.map(day => buildSection(day, venueMap)).join('')}
       <footer style="margin-top:64px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <div style="font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#ffb3d6;">whats 'appnin?</div>
+        <div style="font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#ffb3d6;">whatscomingup?</div>
         <div style="font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#6f6878;text-align:right;">a love letter to queer london nightlife<br>got a night to list? hello@whatsnin.london</div>
       </footer>
     </main>`;
