@@ -92,7 +92,7 @@ function buildCard(event, venueMap) {
     ? `<div style="width:100%;height:130px;overflow:hidden;flex-shrink:0;"><img src="${safeUrl(event.image_url)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;"></div>`
     : '';
   const blurbHtml = event.description
-    ? `<p style="margin:0;font-size:12px;line-height:1.5;color:#a9a1b3;">${esc(event.description)}</p>`
+    ? `<p style="margin:0;font-size:12px;line-height:1.5;color:#a9a1b3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;">${esc(event.description)}</p>`
     : '';
 
   return `<article class="event-card" data-venue="${event.venue}" style="animation:ninFade 0.4s ease both;display:flex;flex-direction:column;background:#161420;border:1px solid rgba(255,255,255,0.07);border-left:3px solid ${color};border-radius:8px;overflow:hidden;">
@@ -102,7 +102,7 @@ function buildCard(event, venueMap) {
         <span style="display:inline-flex;align-items:center;gap:5px;font-family:'Spline Sans Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.02em;padding:3px 6px;border-radius:99px;background:${color}22;color:${color};overflow:hidden;max-width:60%;"><span style="width:5px;height:5px;border-radius:99px;background:${color};flex:0 0 auto;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(venueName)}</span></span>
         <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;font-weight:500;color:#cabfd4;white-space:nowrap;">${esc(event.time || '')}</span>
       </div>
-      <h3 style="margin:0;font-weight:700;font-size:15px;line-height:1.12;letter-spacing:-0.02em;">${esc(event.title)}</h3>
+      <h3 style="margin:0;font-weight:700;font-size:15px;line-height:1.12;letter-spacing:-0.02em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;">${esc(event.title)}</h3>
       ${blurbHtml}
       <div style="margin-top:auto;padding-top:4px;display:flex;justify-content:flex-end;">
         <a href="${safeUrl(event.link)}" target="_blank" rel="noopener" style="font-family:'Spline Sans Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;text-decoration:none;padding:5px 10px;border-radius:99px;color:${color};border:1px solid ${color}44;">Details →</a>
@@ -352,9 +352,12 @@ async function run() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    const oneMonthOut = new Date(today);
+    oneMonthOut.setMonth(oneMonthOut.getMonth() + 1);
+
     const futureEvents = events
       .map(e => ({ ...e, _date: new Date(e.date) }))
-      .filter(e => e._date >= today)
+      .filter(e => e._date >= today && e._date < oneMonthOut)
       .sort((a, b) => a._date - b._date);
 
     const dayMap = new Map();
@@ -364,7 +367,7 @@ async function run() {
       dayMap.get(key).events.push(e);
     });
 
-    const days = Array.from(dayMap.values()).slice(0, 14);
+    const days = Array.from(dayMap.values());
 
     document.getElementById('app').innerHTML = buildPage(venues, days);
     attachHandlers();
