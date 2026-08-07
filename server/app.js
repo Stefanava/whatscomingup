@@ -1,12 +1,10 @@
 require('dotenv').config({ quiet: true });
 const express = require('express')
-const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors')
 const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
 const passport = require('./passport');
-const pool = require('../public/js/utils/db');
 
 // All venue-specific scraping/extraction logic lives in Supabase Edge
 // Functions (supabase/functions/) — this app has no knowledge of how any
@@ -24,136 +22,145 @@ async function callEdgeFunction(name, { searchParams } = {}) {
 	return response.json();
 }
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+// Takes the DB pool as a parameter (rather than requiring
+// public/js/utils/db.js at module scope) so tests can build an app wired
+// to a fake pool instead of the real production database.
+function createApp(pool) {
+	const app = express();
 
-app.use(session({
-	store: new PgSession({ pool, createTableIfMissing: true }),
-	secret: process.env.SESSION_SECRET || 'wcu-dev-secret',
-	resave: false,
-	saveUninitialized: false,
-	cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
-}));
-app.use(passport.initialize());
-app.use(passport.session());
+	app.use(bodyParser.urlencoded({ extended: true }));
+	app.use(bodyParser.json());
 
-app.use(express.static('dist'));
+	app.use(session({
+		store: new PgSession({ pool, createTableIfMissing: true }),
+		secret: process.env.SESSION_SECRET || 'wcu-dev-secret',
+		resave: false,
+		saveUninitialized: false,
+		cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 },
+	}));
+	app.use(passport.initialize());
+	app.use(passport.session());
 
-app.get('/__gtg', (req, res) => {
-	res.send('Good to go');
-});
+	app.use(express.static('dist'));
 
-app.post('/get-venues', cors(), async (req, res) => {
-	try {
-		const { active } = req.body;
-		let query = 'SELECT * FROM venues';
-		if (active === 'TRUE') query += " WHERE active = 'TRUE'";
-		query += ' ORDER BY name';
-		const { rows } = await pool.query(query);
-		res.json(rows);
-	} catch (err) {
-		console.log(err);
-		res.send([]);
-	}
-});
+	app.get('/__gtg', (req, res) => {
+		res.send('Good to go');
+	});
 
-app.get('/get-events', cors(), async (req, res) => {
-	try {
-		console.log('Get all events');
-		const { rows } = await pool.query('SELECT * FROM events');
-		console.log('Successfully retrieved all events');
-		res.json(rows);
-	} catch (err) {
-		console.log(err);
-		res.send([]);
-	}
-});
-
-app.get('/scrape-venues', cors(), async (req, res) => {
-	try {
-		res.json(await callEdgeFunction('refresh-events', { searchParams: { mode: 'full' } }));
-	} catch (err) {
-		console.log(err);
-		res.status(500).json({ error: err.message });
-	}
-});
-
-app.get('/refresh-events', cors(), async (req, res) => {
-	try {
-		res.json(await callEdgeFunction('refresh-events'));
-	} catch (err) {
-		console.log(err);
-		res.status(500).json({ error: err.message });
-	}
-});
-
-// ── auth ──────────────────────────────────────────────────────────────────────
-
-app.get('/auth/me', cors(), async (req, res) => {
-	const authAvailable = !!process.env.GOOGLE_CLIENT_ID;
-	if (!req.user) return res.json({ user: null, authAvailable });
-	try {
-		const { rows } = await pool.query(
-			'SELECT venue_slug FROM user_favourites WHERE user_id = $1',
-			[req.user.id]
-		);
-		res.json({ user: req.user, favourites: rows.map(r => r.venue_slug), authAvailable });
-	} catch (_) {
-		res.json({ user: req.user, favourites: [], authAvailable });
-	}
-});
-
-app.post('/auth/favourites', cors(), async (req, res) => {
-	if (!req.user) return res.status(401).json({ error: 'Not logged in' });
-	const { venues } = req.body;
-	if (!Array.isArray(venues)) return res.status(400).json({ error: 'venues must be an array' });
-	try {
-		await pool.query('DELETE FROM user_favourites WHERE user_id = $1', [req.user.id]);
-		if (venues.length) {
-			const values = venues.map((_, i) => `($1, $${i + 2})`).join(', ');
-			await pool.query(
-				`INSERT INTO user_favourites (user_id, venue_slug) VALUES ${values}`,
-				[req.user.id, ...venues]
-			);
+	app.post('/get-venues', cors(), async (req, res) => {
+		try {
+			const { active } = req.body;
+			let query = 'SELECT * FROM venues';
+			if (active === 'TRUE') query += " WHERE active = 'TRUE'";
+			query += ' ORDER BY name';
+			const { rows } = await pool.query(query);
+			res.json(rows);
+		} catch (err) {
+			console.log(err);
+			res.send([]);
 		}
-		res.json({ ok: true });
-	} catch (err) {
-		res.status(500).json({ error: err.message });
+	});
+
+	app.get('/get-events', cors(), async (req, res) => {
+		try {
+			console.log('Get all events');
+			const { rows } = await pool.query('SELECT * FROM events');
+			console.log('Successfully retrieved all events');
+			res.json(rows);
+		} catch (err) {
+			console.log(err);
+			res.send([]);
+		}
+	});
+
+	app.get('/scrape-venues', cors(), async (req, res) => {
+		try {
+			res.json(await callEdgeFunction('refresh-events', { searchParams: { mode: 'full' } }));
+		} catch (err) {
+			console.log(err);
+			res.status(500).json({ error: err.message });
+		}
+	});
+
+	app.get('/refresh-events', cors(), async (req, res) => {
+		try {
+			res.json(await callEdgeFunction('refresh-events'));
+		} catch (err) {
+			console.log(err);
+			res.status(500).json({ error: err.message });
+		}
+	});
+
+	// ── auth ──────────────────────────────────────────────────────────────────────
+
+	app.get('/auth/me', cors(), async (req, res) => {
+		const authAvailable = !!process.env.GOOGLE_CLIENT_ID;
+		if (!req.user) return res.json({ user: null, authAvailable });
+		try {
+			const { rows } = await pool.query(
+				'SELECT venue_slug FROM user_favourites WHERE user_id = $1',
+				[req.user.id]
+			);
+			res.json({ user: req.user, favourites: rows.map(r => r.venue_slug), authAvailable });
+		} catch (_) {
+			res.json({ user: req.user, favourites: [], authAvailable });
+		}
+	});
+
+	app.post('/auth/favourites', cors(), async (req, res) => {
+		if (!req.user) return res.status(401).json({ error: 'Not logged in' });
+		const { venues } = req.body;
+		if (!Array.isArray(venues)) return res.status(400).json({ error: 'venues must be an array' });
+		try {
+			await pool.query('DELETE FROM user_favourites WHERE user_id = $1', [req.user.id]);
+			if (venues.length) {
+				const values = venues.map((_, i) => `($1, $${i + 2})`).join(', ');
+				await pool.query(
+					`INSERT INTO user_favourites (user_id, venue_slug) VALUES ${values}`,
+					[req.user.id, ...venues]
+				);
+			}
+			res.json({ ok: true });
+		} catch (err) {
+			res.status(500).json({ error: err.message });
+		}
+	});
+
+	if (process.env.GOOGLE_CLIENT_ID) {
+		app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+		app.get('/auth/google/callback',
+			passport.authenticate('google', { failureRedirect: '/' }),
+			(req, res) => res.redirect('/?loggedIn=1')
+		);
 	}
-});
 
-if (process.env.GOOGLE_CLIENT_ID) {
-	app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+	app.get('/auth/logout', (req, res, next) => {
+		req.logout(err => {
+			if (err) return next(err);
+			res.redirect('/');
+		});
+	});
 
-	app.get('/auth/google/callback',
-		passport.authenticate('google', { failureRedirect: '/' }),
-		(req, res) => res.redirect('/?loggedIn=1')
-	);
+	app.get('/update-event-details', cors(), async (req, res) => {
+		try {
+			res.json(await callEdgeFunction('update-event-details'));
+		} catch (err) {
+			console.log(err);
+			res.status(500).json({ error: err.message });
+		}
+	});
+
+	app.get('/venue/:slug/preview', cors(), async (req, res) => {
+		try {
+			res.json(await callEdgeFunction('refresh-events', { searchParams: { slug: req.params.slug } }));
+		} catch (err) {
+			console.log(err);
+			res.status(500).json({ error: err.message });
+		}
+	});
+
+	return app;
 }
 
-app.get('/auth/logout', (req, res, next) => {
-	req.logout(err => {
-		if (err) return next(err);
-		res.redirect('/');
-	});
-});
-
-app.get('/update-event-details', cors(), async (req, res) => {
-	try {
-		res.json(await callEdgeFunction('update-event-details'));
-	} catch (err) {
-		console.log(err);
-		res.status(500).json({ error: err.message });
-	}
-});
-
-app.get('/venue/:slug/preview', cors(), async (req, res) => {
-	try {
-		res.json(await callEdgeFunction('refresh-events', { searchParams: { slug: req.params.slug } }));
-	} catch (err) {
-		console.log(err);
-		res.status(500).json({ error: err.message });
-	}
-});
-
-module.exports = app;
+module.exports = createApp;
