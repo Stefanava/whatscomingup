@@ -89,19 +89,32 @@ function buildHeader(venues, days) {
         <div id="auth-area" style="display:flex;align-items:center;"></div>
       </div>
     </div>
-    <div id="header-collapsible" style="overflow:hidden;max-height:0;opacity:0;transition:max-height 0.35s ease,opacity 0.2s ease;">
-      <div class="nin-pills-row nin-scroll" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button id="pill-my-venues" style="display:none;flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:none;background:#ff3d9a;color:#0c0b0f;transition:all 0.15s;">My venues ♥</button>
-        <button id="pill-all" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid #f3efe9;background:#f3efe9;color:#0c0b0f;transition:all 0.15s;">All venues</button>
-        <button id="pill-filter-venues" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;">Venues</button>
-        <button id="pill-filter-promoters" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;">Club nights</button>
+    <div class="nin-key-pills-row nin-scroll" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <button id="pill-my-venues" style="display:none;flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:none;background:#ff3d9a;color:#0c0b0f;transition:all 0.15s;">My venues ♥</button>
+      <button id="pill-all" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid #f3efe9;background:#f3efe9;color:#0c0b0f;transition:all 0.15s;">All venues</button>
+      <button id="pill-filter-venues" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;">Venues</button>
+      <button id="pill-filter-promoters" style="flex:0 0 auto;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;">Club nights</button>
+      <button id="btn-toggle-venues" style="flex:0 0 auto;display:flex;align-items:center;gap:6px;font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.02em;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);color:#cabfd4;transition:all 0.15s;">More venues <span id="venue-toggle-arrow" style="font-size:9px;display:inline-block;transition:transform 0.2s ease;">▾</span></button>
+    </div>
+    <div id="venue-pills-panel" style="overflow:hidden;max-height:0;opacity:0;transition:max-height 0.3s ease,opacity 0.2s ease;">
+      <div class="nin-venue-pills nin-scroll" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:8px;flex-wrap:wrap;">
         ${venuePills}
       </div>
-      <nav class="nin-scroll nin-day-nav" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:6px;overflow-x:auto;border-top:1px solid rgba(255,255,255,0.05);">
-        ${dayPills}
-      </nav>
     </div>
+    <nav class="nin-scroll nin-day-nav" style="max-width:1280px;margin:0 auto;padding:0 28px 14px;display:flex;gap:6px;overflow-x:auto;border-top:1px solid rgba(255,255,255,0.05);">
+      ${dayPills}
+    </nav>
   </header>`;
+}
+
+function toggleVenuePanel() {
+  const panel = document.getElementById('venue-pills-panel');
+  const arrow = document.getElementById('venue-toggle-arrow');
+  const isOpen = panel.dataset.open === 'true';
+  panel.dataset.open = isOpen ? 'false' : 'true';
+  panel.style.maxHeight = isOpen ? '0' : '600px';
+  panel.style.opacity = isOpen ? '0' : '1';
+  arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
 }
 
 function buildCard(event, venueMap) {
@@ -373,23 +386,8 @@ function setView(view) {
 
 function attachHandlers() {
   const header = document.getElementById('site-header');
-  const collapsible = document.getElementById('header-collapsible');
 
-  const expand = () => {
-    collapsible.style.maxHeight = '400px';
-    collapsible.style.opacity = '1';
-  };
-  const collapse = () => {
-    collapsible.style.maxHeight = '0';
-    collapsible.style.opacity = '0';
-  };
-
-  if (window.matchMedia('(hover: hover)').matches) {
-    header.addEventListener('mouseenter', expand);
-    header.addEventListener('mouseleave', collapse);
-  } else {
-    expand();
-  }
+  document.getElementById('btn-toggle-venues').addEventListener('click', toggleVenuePanel);
 
   const scrapeBtn = document.getElementById('btn-scrape');
   const lastScrapedEl = document.getElementById('last-scraped');
