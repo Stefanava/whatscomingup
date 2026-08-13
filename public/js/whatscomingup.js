@@ -170,7 +170,9 @@ function buildFooter() {
 }
 
 function buildMainList(days, venueMap) {
-  return days.map(day => buildSection(day, venueMap)).join('') + buildFooter();
+  return `<div id="filter-notice" style="display:none;margin-top:32px;margin-bottom:16px;padding:10px 16px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);font-family:'Spline Sans Mono',monospace;font-size:12px;color:#8f8898;"></div>`
+    + days.map(day => buildSection(day, venueMap)).join('')
+    + buildFooter();
 }
 
 function buildCalendarCell(cell, venueMap) {
@@ -296,11 +298,25 @@ function renderFilter() {
     card.style.display = (isAll || activeFilters.has(card.dataset.venue)) ? '' : 'none';
   });
 
+  let hiddenDayCount = 0;
+
   document.querySelectorAll('.day-section').forEach(section => {
     const key = section.dataset.day;
     const visible = Array.from(section.querySelectorAll('.event-card'))
       .filter(el => el.style.display !== 'none').length;
     setSectionVisibility(section, visible);
+
+    // In list view, a day a filter has emptied out is dropped entirely
+    // (not just its event grid — the whole section, heading included)
+    // rather than left showing an empty-state box per day: with a narrow
+    // filter that can be most of the month, and stacking one dashed
+    // placeholder per empty day made scrolling to the next real match
+    // tedious. What replaced it is the single #filter-notice banner
+    // below, which explains the gap once instead of per day.
+    if (currentView === 'list') {
+      section.style.display = visible ? '' : 'none';
+      if (!visible) hiddenDayCount++;
+    }
 
     const countEl = document.querySelector(`.day-count[data-day="${key}"]`);
     const summaryEl = document.querySelector(`.day-summary[data-day="${key}"]`);
@@ -309,6 +325,16 @@ function renderFilter() {
       ? `${visible} night${visible !== 1 ? 's' : ''}`
       : 'filtered';
   });
+
+  const notice = document.getElementById('filter-notice');
+  if (notice) {
+    if (currentView === 'list' && !isAll && hiddenDayCount > 0) {
+      notice.textContent = `${hiddenDayCount} day${hiddenDayCount !== 1 ? 's' : ''} hidden — no events match this filter`;
+      notice.style.display = '';
+    } else {
+      notice.style.display = 'none';
+    }
+  }
 
   // Calendar cells and the day panel aren't `.event-card`/`.day-summary`
   // elements the loops above touch — and the panel pre-filters events at
