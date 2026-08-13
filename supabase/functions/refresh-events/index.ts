@@ -101,11 +101,9 @@ Deno.serve(async (req) => {
 
 		const today = new Date();
 
-		// Venues are independent (bar the RA cache, which memoizes its own
-		// in-flight fetch — see ra-client.ts), so run them concurrently rather
-		// than one at a time: sequential, this routinely blew past the edge
-		// runtime's 150s idle timeout once every venue had a real provider or
-		// LLM call to make.
+		// Venues are independent, so run them concurrently rather than one at
+		// a time: sequential, this routinely blew past the edge runtime's 150s
+		// idle timeout once every venue had a real provider or LLM call to make.
 		const results = await Promise.all(((venues ?? []) as Venue[]).map(async venue => {
 			const { slug, name } = venue;
 			const result = { name, eventsInserted: 0, error: null as string | null };
