@@ -34,4 +34,6 @@ button:active { transform: scale(0.96); }
   .day-section       { padding-top: 28px !important; }
   .day-heading       { font-size: 24px !important; line-height: 1.1 !important; }
   .event-grid        { grid-template-columns: 1fr !important; gap: 12px !important; }
+  .calendar-grid button.calendar-cell { border-radius: 6px !important; }
+  .calendar-grid button.calendar-cell span { font-size: 11px !important; }
 }

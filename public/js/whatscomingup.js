@@ -2,10 +2,25 @@ const getVenues = require('./utils/get-venues');
 const getEvents = require('./utils/get-events');
 const { WD_SHORT, WD_LONG, MONTHS, esc, safeUrl, dateKey, dayId, fmtToday } = require('./utils/format');
 const { setSectionVisibility } = require('./utils/section-visibility');
+const { buildCalendarWeeks, filterDayEvents, dayHasNight } = require('./utils/calendar');
 
 let VENUE_COLORS = {};
 
+// ── view state ────────────────────────────────────────────────────────────────
+
+let currentView = 'list'; // 'list' | 'calendar'
+let selectedDayKey = null;
+const STATE = { venueMap: {}, dayMap: new Map(), todayKey: null, windowStart: null, windowEnd: null };
+
 function col(slug) { return VENUE_COLORS[slug] || '#ff3d9a'; }
+
+// Parses a `dateKey` ("YYYY-MM-DD") back into a local-time Date, matching
+// dateKey's own local getFullYear/getMonth/getDate — `new Date(key)` would
+// parse it as UTC midnight instead and can land on the wrong local day.
+function keyToDate(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
 
 // ── favourites ────────────────────────────────────────────────────────────────
 
@@ -67,6 +82,10 @@ function buildHeader(venues, days) {
           <button id="btn-scrape" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:#8f8898;background:transparent;border:1px solid rgba(255,255,255,0.12);border-radius:99px;padding:8px 14px;cursor:pointer;">Get latest</button>
         </div>
         <button id="btn-tonight" style="font-family:'Spline Sans Mono',monospace;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#0c0b0f;background:#ffb3d6;border:none;border-radius:99px;padding:8px 14px;cursor:pointer;">Tonight</button>
+        <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:2px;">
+          <button id="btn-view-list" style="font-family:'Spline Sans Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;border:none;border-radius:99px;padding:6px 12px;cursor:pointer;color:#0c0b0f;background:#ffb3d6;">List</button>
+          <button id="btn-view-calendar" style="font-family:'Spline Sans Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;border:none;border-radius:99px;padding:6px 12px;cursor:pointer;color:#cabfd4;background:transparent;">Calendar</button>
+        </div>
         <div id="auth-area" style="display:flex;align-items:center;"></div>
       </div>
     </div>
@@ -125,9 +144,84 @@ function buildSection(day, venueMap) {
       ${cards}
     </div>
     <div class="empty-state" data-day="${day.key}" style="display:none;padding:40px 24px;border:1px dashed rgba(255,255,255,0.12);border-radius:16px;text-align:center;">
-      <p style="margin:0;font-size:16px;color:#8f8898;">No events for this venue on this day.</p>
+      <p style="margin:0;font-size:16px;color:#8f8898;">No events on this day.</p>
     </div>
   </section>`;
+}
+
+function buildFooter() {
+  return `<footer style="margin-top:64px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+    <div style="font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#ffb3d6;">whatscomingup?</div>
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#6f6878;text-align:right;">a love letter to queer london nightlife<br>got a night to list? hello@whatsnin.london</div>
+  </footer>`;
+}
+
+function buildMainList(days, venueMap) {
+  return days.map(day => buildSection(day, venueMap)).join('') + buildFooter();
+}
+
+function buildCalendarCell(cell, venueMap) {
+  const filtered = filterDayEvents(cell.events, activeFilters);
+  const count = filtered.length;
+  const isNight = cell.inRange && dayHasNight(filtered, venueMap);
+  const isToday = cell.key === STATE.todayKey;
+  const isSelected = cell.key === selectedDayKey;
+
+  let border = '1px solid rgba(255,255,255,0.1)';
+  let background = 'rgba(255,255,255,0.03)';
+  let color = '#cabfd4';
+
+  if (!cell.inRange) {
+    border = '1px solid transparent';
+    background = 'transparent';
+    color = '#4a4552';
+  } else if (isSelected) {
+    border = '1px solid #ffb3d6';
+    background = '#ffb3d6';
+    color = '#0c0b0f';
+  } else if (isNight) {
+    border = '1px solid #ff3d9a';
+    background = '#ff3d9a1a';
+    color = '#f3efe9';
+  } else if (isToday) {
+    border = '1px solid #ffb3d6';
+  }
+
+  const countHtml = cell.inRange
+    ? `<span class="calendar-count" style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:0.05em;color:${isSelected ? '#0c0b0f' : '#ff3d9a'};min-height:11px;">${count || ''}</span>`
+    : '';
+
+  return `<button class="calendar-cell" data-day="${cell.key}" data-in-range="${cell.inRange}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;aspect-ratio:1;border-radius:10px;cursor:${cell.inRange ? 'pointer' : 'default'};pointer-events:${cell.inRange ? 'auto' : 'none'};border:${border};background:${background};color:${color};transition:all 0.15s;">
+    <span style="font-weight:700;font-size:14px;line-height:1;">${cell.date.getDate()}</span>
+    ${countHtml}
+  </button>`;
+}
+
+function buildCalendarPanelSection(venueMap) {
+  const entry = STATE.dayMap.get(selectedDayKey);
+  const date = entry ? entry.date : keyToDate(selectedDayKey);
+  const events = entry ? entry.events : [];
+  const filtered = filterDayEvents(events, activeFilters);
+  return buildSection({ key: selectedDayKey, date, events: filtered }, venueMap);
+}
+
+function buildMainCalendar(venueMap) {
+  const weeks = buildCalendarWeeks(STATE.windowStart, STATE.windowEnd, STATE.dayMap);
+  const weekdayHeader = WD_SHORT.map(d => `<div style="text-align:center;font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#8f8898;padding-bottom:8px;">${d}</div>`).join('');
+  const cells = weeks.flat().map(cell => buildCalendarCell(cell, venueMap)).join('');
+
+  // #calendar-panel starts empty and is populated by renderCalendarPanel()
+  // right after this markup is inserted into the DOM — unlike list-view
+  // day-sections (always built with ≥1 event by construction), a selected
+  // calendar day can genuinely have zero events, and correctly showing the
+  // empty state requires setSectionVisibility(), which needs real DOM nodes.
+  return `
+    <div style="padding-top:32px;">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;">${weekdayHeader}</div>
+      <div id="calendar-grid" class="calendar-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">${cells}</div>
+    </div>
+    <div id="calendar-panel" style="padding-top:32px;"></div>
+    ${buildFooter()}`;
 }
 
 function buildPage(venues, days) {
@@ -135,12 +229,8 @@ function buildPage(venues, days) {
   venues.forEach(v => { venueMap[v.slug] = v; });
 
   return buildHeader(venues, days) + `
-    <main class="nin-main" style="max-width:1280px;margin:0 auto;padding:0 28px 80px;">
-      ${days.map(day => buildSection(day, venueMap)).join('')}
-      <footer style="margin-top:64px;padding-top:28px;border-top:1px solid rgba(255,255,255,0.09);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-        <div style="font-weight:800;font-size:20px;letter-spacing:-0.02em;color:#ffb3d6;">whatscomingup?</div>
-        <div style="font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#6f6878;text-align:right;">a love letter to queer london nightlife<br>got a night to list? hello@whatsnin.london</div>
-      </footer>
+    <main id="main-content" class="nin-main" style="max-width:1280px;margin:0 auto;padding:0 28px 80px;">
+      ${buildMainList(days, venueMap)}
     </main>`;
 }
 
@@ -206,6 +296,77 @@ function renderFilter() {
       ? `${visible} night${visible !== 1 ? 's' : ''}`
       : 'filtered';
   });
+
+  // Calendar cells and the day panel aren't `.event-card`/`.day-summary`
+  // elements the loops above touch — and the panel pre-filters events at
+  // build time rather than hiding cards via display:none, so a filter
+  // change can only be reflected by rebuilding it, not by restyling it.
+  if (currentView === 'calendar') {
+    renderCalendarGrid();
+    renderCalendarPanel();
+  }
+}
+
+// ── calendar view ─────────────────────────────────────────────────────────────
+
+function attachCalendarCellHandlers() {
+  document.querySelectorAll('.calendar-cell').forEach(cellEl => {
+    if (cellEl.dataset.inRange !== 'true') return;
+    cellEl.addEventListener('click', () => selectCalendarDay(cellEl.dataset.day));
+  });
+}
+
+function renderCalendarGrid() {
+  const gridEl = document.getElementById('calendar-grid');
+  if (!gridEl) return;
+  const weeks = buildCalendarWeeks(STATE.windowStart, STATE.windowEnd, STATE.dayMap);
+  gridEl.innerHTML = weeks.flat().map(cell => buildCalendarCell(cell, STATE.venueMap)).join('');
+  attachCalendarCellHandlers();
+}
+
+function renderCalendarPanel() {
+  const panelEl = document.getElementById('calendar-panel');
+  if (!panelEl) return;
+  panelEl.innerHTML = buildCalendarPanelSection(STATE.venueMap);
+  const entry = STATE.dayMap.get(selectedDayKey);
+  const filtered = filterDayEvents(entry ? entry.events : [], activeFilters);
+  setSectionVisibility(panelEl.querySelector('.day-section'), filtered.length);
+}
+
+function selectCalendarDay(key) {
+  selectedDayKey = key;
+  renderCalendarGrid();
+  renderCalendarPanel();
+}
+
+function renderMain() {
+  const main = document.getElementById('main-content');
+  main.innerHTML = currentView === 'calendar'
+    ? buildMainCalendar(STATE.venueMap)
+    : buildMainList(Array.from(STATE.dayMap.values()), STATE.venueMap);
+  // renderFilter() rebuilds+attaches the calendar grid/panel when
+  // currentView === 'calendar' (see its calendar branch), or restyles
+  // list-view pills/cards otherwise — single path for both.
+  renderFilter();
+  const dayNav = document.querySelector('.nin-day-nav');
+  if (dayNav) dayNav.style.display = currentView === 'calendar' ? 'none' : 'flex';
+}
+
+function updateViewToggleUI() {
+  const listBtn = document.getElementById('btn-view-list');
+  const calBtn = document.getElementById('btn-view-calendar');
+  if (!listBtn || !calBtn) return;
+  listBtn.style.color = currentView === 'list' ? '#0c0b0f' : '#cabfd4';
+  listBtn.style.background = currentView === 'list' ? '#ffb3d6' : 'transparent';
+  calBtn.style.color = currentView === 'calendar' ? '#0c0b0f' : '#cabfd4';
+  calBtn.style.background = currentView === 'calendar' ? '#ffb3d6' : 'transparent';
+}
+
+function setView(view) {
+  if (view === currentView) return;
+  currentView = view;
+  renderMain();
+  updateViewToggleUI();
 }
 
 // ── handlers ──────────────────────────────────────────────────────────────────
@@ -268,6 +429,9 @@ function attachHandlers() {
   document.getElementById('btn-tonight').addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
+
+  document.getElementById('btn-view-list').addEventListener('click', () => setView('list'));
+  document.getElementById('btn-view-calendar').addEventListener('click', () => setView('calendar'));
 
   document.getElementById('pill-all').addEventListener('click', () => clearFilters());
 
@@ -368,6 +532,13 @@ async function run() {
     });
 
     const days = Array.from(dayMap.values());
+
+    const venueMap = {};
+    venues.forEach(v => { venueMap[v.slug] = v; });
+
+    const todayKey = dateKey(today);
+    Object.assign(STATE, { venueMap, dayMap, todayKey, windowStart: today, windowEnd: oneMonthOut });
+    selectedDayKey = todayKey;
 
     document.getElementById('app').innerHTML = buildPage(venues, days);
     attachHandlers();
